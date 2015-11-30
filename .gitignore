@@ -1,6 +1,8 @@
 .git/
 Release/
+Debug/
 CardsDetection/x64
+CardsDetection/Debug/
 CardsDetection/*.vcxproj
 CardsDetection/*.filters
 x64/

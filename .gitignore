@@ -1,0 +1,10 @@
+.git/
+Release/
+CardsDetection/x64
+CardsDetection/*.vcxproj
+CardsDetection/*.filters
+x64/
+*.opensdf
+*.sdf
+*.sln
+*.suo

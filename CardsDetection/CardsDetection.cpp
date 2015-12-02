@@ -1,43 +1,48 @@
-#include <iostream>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include "Cli.h"
-#include "Opencv.h"
 #include "CardsDetection.h"
 
 using namespace cv;
 using namespace std;
 
-int main(int argc, char** argv) {
+int MAX_KERNEL_SIZE = 7;
 
-	string contentDir = "cards\\";
+void imageBasedVersion(string imagesDir) {
+	Mat img = imread(imagesDir, CV_LOAD_IMAGE_COLOR);
 
-	int choice = -1; // 1-> image / 2 -> video
-	choice = initCli();
 
-	string imgName = "";
-	switch (choice) {
-		case 1:
-			imgName = getImgPath(contentDir);
-			contentDir += imgName;
-			imageBasedVersion(contentDir);
-			break;
-		case 2:
-			videoBasedVersion();
-			break;
-		default:
-			break;
+	Mat gray;
+	cvtColor(img, gray, CV_RGB2GRAY);
+
+	for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
+		GaussianBlur(gray, img, Size(i, i), 0.0, 0.0);
+
+	threshold(img, img, 120, 255, CV_THRESH_BINARY);
+
+	Canny(img, img, 50, 250);
+
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+
+	findContours(img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+
+	sort(contours.begin(), contours.end(), compareAreas);
+
+	RNG rng(1000);
+	if (contours.size() >= 1) {
+		Scalar color = Scalar(255, 255, 255);
+		drawContours(gray, contours, 0, color, 4, 8, hierarchy, 0, Point());
 	}
 
-	waitKey(0);
-	return 0;
 
-	/*
+	imshow("Webcam", gray);
+
+
+}
+
+void videoBasedVersion() {
 	VideoCapture cap(0);
 	if (!cap.isOpened()) {
 		cout << "Cannot open the video cam" << endl;
-		return -1;
+		return;
 	}
 
 	namedWindow("Webcam", CV_WINDOW_AUTOSIZE);
@@ -51,7 +56,7 @@ int main(int argc, char** argv) {
 
 		Mat gray;
 		cvtColor(frame, gray, CV_RGB2GRAY);
-		
+
 		for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
 			GaussianBlur(gray, frame, Size(i, i), 0.0, 0.0);
 
@@ -83,6 +88,12 @@ int main(int argc, char** argv) {
 			break;
 		}
 	}
-	return 0;
-	*/
 }
+
+// receives v1 and v2 point vectors and if v1 greater v2 return true
+bool compareAreas(vector<Point> v1, vector<Point> v2) {
+
+	return contourArea(v1, true) > contourArea(v2, true);
+
+}
+

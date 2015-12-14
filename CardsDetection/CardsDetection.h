@@ -7,6 +7,15 @@
 
 extern int MAX_KERNEL_SIZE;
 
+void cardToVertical(cv::Point2f*);
+
+cv::Mat appendImages(cv::Mat deckArray, cv::Mat card, int index);
+
+void processDeck(std::string imagesDir);
+
+/*Returns the distance between 2 points*/
+float distancePoints(cv::Point2f p1, cv::Point2f p2);
+
 /* Road detection using uploaded images (.bmp, .jpg, .JPEG, .png, ...) */
 void imageBasedVersion(std::string);
 

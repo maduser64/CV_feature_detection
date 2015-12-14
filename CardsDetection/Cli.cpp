@@ -34,17 +34,19 @@ int initCli() {
 
 string getImgPath(string dir) {
 	string imgPath = "";
+	string filePath = "";
 	while (true) {
 		cout << "Please insert the file name" << endl;
 		cout << ">> ";
 		cin >> imgPath;
-		string filePath = dir + imgPath;
+		filePath = dir + imgPath;
 		if (fileExists(filePath))
 			break;
 		else
 			cout << "The name you specified does not exist, please try again" << endl;
 	}
-	return imgPath;
+
+	return filePath;
 }
 
 inline bool fileExists(const std::string& name) {

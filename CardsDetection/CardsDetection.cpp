@@ -93,7 +93,7 @@ void processDeck(string imagesDir) {
 
 		adaptiveThreshold(deckArray, deckArray, 255, 1, 1, 11, 1);
 
-		imwrite("cards/deck_array.jpg", deckArray);
+		imwrite("deck/deck_array.jpg", deckArray);
 
 	}
 }
@@ -103,8 +103,16 @@ int getAbsDifference(Mat img1, Mat img2) {
 	namedWindow("Difference", CV_WINDOW_AUTOSIZE);
 	Mat diff;
 	absdiff(img1, img2, diff);
+	GaussianBlur(diff, diff, Size(5, 5), 5);
+	threshold(diff, diff, 200, 255, CV_THRESH_BINARY);
 
-	//imshow("Difference", diff);
+	imshow("Difference", diff);
+
+	Scalar s(sum(diff));
+
+	//cout << s[0] << endl;
+
+	return s[0];
 
 }
 
@@ -198,10 +206,12 @@ void imageBasedVersion(string imagesDir) {
 		for (unsigned int j = 0; j < 2; j++) {
 
 			getAbsDifference(table[i][j], table[i][j]);
-			getAbsDifference(table[i][j], table[i][j])
+			//getAbsDifference(table[i][j], table[i][j]);
+			break;
 
 
 		}
+		break;
 	}
 	
 

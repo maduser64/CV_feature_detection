@@ -17,5 +17,6 @@ public:
 	cv::Mat getRotatedImg();
 	void setRotatedImg(cv::Mat img);
 	std::map<Card*, int> getCardDifferences();
+	void PlayedCard::computeAbsDifference(std::vector<Card*>);
 	~PlayedCard();
 };

@@ -7,14 +7,23 @@
 
 extern int MAX_KERNEL_SIZE;
 
+/* Receives a point array and transforms the card mapping to vertical */
 void cardToVertical(cv::Point2f*);
 
+/*Rotates a given image with received degrees*/
+void rotateCard(cv::Mat&, double angle, cv::Mat& dst);
+
+/* Returns the distance between 2 points */
+float distancePoints(cv::Point2f p1, cv::Point2f p2);
+
+/*Aux function to processDeck function, appends a card by card on array of cards*/
 cv::Mat appendImages(cv::Mat deckArray, cv::Mat card, int index);
 
+/* Receives one image with entire deck and saves an array with cards */
 void processDeck(std::string imagesDir);
 
-/*Returns the distance between 2 points*/
-float distancePoints(cv::Point2f p1, cv::Point2f p2);
+/*Compares cards and returns the absolute difference between them*/
+int getAbsDifference(cv::Mat img1, cv::Mat img2);
 
 /* Road detection using uploaded images (.bmp, .jpg, .JPEG, .png, ...) */
 void imageBasedVersion(std::string);

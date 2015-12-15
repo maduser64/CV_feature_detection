@@ -17,8 +17,10 @@ int main(int argc, char** argv) {
 	Mat img = imread("cards/fulldeck.png", CV_LOAD_IMAGE_COLOR); 
 
 	if (!deckPreProcessed()) {
+		cout << "Pre-processing deck, please wait" << endl;
 		string fullDeckPath = "deck/deck.jpg";
 		processDeck(fullDeckPath);
+		cout << "Success!" << endl;
 	}
 
 	int choice = -1; // 1-> image / 2 -> video

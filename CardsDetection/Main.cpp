@@ -6,6 +6,7 @@
 #include "Opencv.h"
 #include "CardsDetection.h"
 #include "Crop.h"
+#include "DeckReader.h"
 
 using namespace cv;
 using namespace std;
@@ -27,7 +28,7 @@ int main(int argc, char** argv) {
 
 	waitKey(0);
 	*/
-	
+
 	int choice = -1; // 1-> image / 2 -> video
 	choice = initCli();
 
@@ -46,5 +47,4 @@ int main(int argc, char** argv) {
 
 	waitKey(0);
 	return 0;
-
 }

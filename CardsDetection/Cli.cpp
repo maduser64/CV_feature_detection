@@ -43,9 +43,8 @@ string getImgPath(string dir) {
 		if (fileExists(filePath))
 			break;
 		else
-			cout << "The name you specified does not exist, please try again" << endl;
+			cout << "The name you specified does not exist, please try again " << filePath << endl;
 	}
-
 	return filePath;
 }
 

@@ -4,8 +4,8 @@ using namespace std;
 using namespace cv;
 
 bool deckPreProcessed() {
-	string filePath = "deck/deck.txt";
-	if (fileExists(filePath))
+	string deckArryPath = "deck/deck_array.jpg";
+	if (fileExists(deckArryPath))
 		return true;
 	else
 		return false;
@@ -73,31 +73,31 @@ int getCardScore(string card) {
 	if (card == "2")
 		return 0;
 	else if (card == "3")
-		return 0;
+		return 1;
 	else if (card == "4")
-		return 0;
+		return 2;
 	else if (card == "5")
-		return 0;
+		return 3;
 	else if (card == "6")
-		return 0;
+		return 4;
 	else if (card == "7")
-		return 0;
+		return 5;
 	else if (card == "8")
-		return 0;
+		return 6;
 	else if (card == "9")
-		return 0;
+		return 7;
 	else if (card == "10")
-		return 0;
+		return 8;
 	else if (card == "Q")
-		return 0;
+		return 9;
 	else if (card == "J")
-		return 0;
+		return 10;
 	else if (card == "K")
-		return 0;
+		return 11;
 	else if (card == "A")
-		return 0;
+		return 12;
 	else if (card == "Joker")
-		return 0;
+		return 13;
 	else
 		return -1;
 }

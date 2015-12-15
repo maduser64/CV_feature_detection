@@ -35,7 +35,8 @@ int main(int argc, char** argv) {
 	switch (choice) {
 		case 1:
 			imgPath = getImgPath(test_dir);
-			processDeck(imgPath);
+			/*processDeck(imgPath);*/
+			imageBasedVersion(imgPath);
 			break;
 		case 2:
 			videoBasedVersion();

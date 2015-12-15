@@ -10,13 +10,15 @@ private:
 	cv::Mat originalImg;
 	cv::Mat rotatedImg;
 	std::map <Card*, int> differences;
+	Card* leastDifferentCard;
 public:
 	PlayedCard();
 	PlayedCard(cv::Mat, cv::Mat, std::vector<Card*>);
 	cv::Mat getOriginalImg();
 	cv::Mat getRotatedImg();
+	Card* getLeastDifferentCard();
 	void setRotatedImg(cv::Mat img);
 	std::map<Card*, int> getCardDifferences();
-	void PlayedCard::computeAbsDifference(std::vector<Card*>);
+	void computeAbsDifference(std::vector<Card*>);
 	~PlayedCard();
 };

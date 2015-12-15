@@ -141,7 +141,7 @@ void imageBasedVersion(string imagesDir) {
 	if (contours.size() >= 4) {
 		Scalar color = Scalar(255, 0, 0);
 		// draw the first 4 contours, this will hopefuly represent the 4 cards
-		for (unsigned int i = 0; i < 4; i++) {
+		for (unsigned int i = 0; i < 1; i++) {
 			//drawContours(img, contours, i, color, 4, 8, hierarchy, 0);
 			RotatedRect rotatedRect = minAreaRect(contours[i]);
 			Point2f rect_points[4];
@@ -162,18 +162,22 @@ void imageBasedVersion(string imagesDir) {
 		}		
 	}
 
-
 	vector<Card*> deck; deck.clear(); deck = getDeck();
 	vector<PlayedCard*> playedCards; playedCards.clear();
 	// Save the original cards and the 180 degrees rotations
-	for (unsigned int i = 0; i < 4; i++) {
+	for (unsigned int i = 0; i < 1; i++) {
 		Mat rotatedCard;
 		rotateCard(procCards[i], 180.0f, rotatedCard);
 		playedCards.push_back( new PlayedCard(procCards[i], rotatedCard, deck) );
 	}
+
 	
-
-
+	namedWindow("Original", WINDOW_AUTOSIZE);
+	imshow("Original", playedCards[0]->getOriginalImg());
+	Card* card = playedCards[0]->getLeastDifferentCard();
+	namedWindow("CardLeast", WINDOW_AUTOSIZE);
+	imshow("CardLeast", deck[29]->getCardImg());
+	imshow("CardLeast", card->getCardImg());
 }
 
 

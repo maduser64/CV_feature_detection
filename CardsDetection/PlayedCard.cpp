@@ -9,9 +9,10 @@ PlayedCard::PlayedCard () {
 	this->differences.clear();
 }
 
-PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg) {
+PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Card*> deck) {
 	this->originalImg = originalImg;
 	this->rotatedImg = rotatedImg;
+	computeAbsDifference(deck);
 }
 
 Mat PlayedCard::getOriginalImg() {

@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <string>
+#include "DeckReader.h"
+#include "PlayedCard.h"
 #include "Opencv.h"
 
 extern int MAX_KERNEL_SIZE;

@@ -98,24 +98,6 @@ void processDeck(string imagesDir) {
 	}
 }
 
-int getAbsDifference(Mat img1, Mat img2) {
-
-	namedWindow("Difference", CV_WINDOW_AUTOSIZE);
-	Mat diff;
-	absdiff(img1, img2, diff);
-	GaussianBlur(diff, diff, Size(5, 5), 5);
-	threshold(diff, diff, 200, 255, CV_THRESH_BINARY);
-
-	imshow("Difference", diff);
-
-	Scalar s(sum(diff));
-
-	//cout << s[0] << endl;
-
-	return s[0];
-
-}
-
 void rotateCard(Mat& src, double angle, Mat& dst) {
 	Point2f pt(src.cols / 2.0F, src.rows / 2.0F);
 	// Returns the rotation matrix that represents the specified rotation
@@ -177,41 +159,17 @@ void imageBasedVersion(string imagesDir) {
 				GaussianBlur(procCards[i], procCards[i], Size(j, j), 0.0, 0.0);
 
 			adaptiveThreshold(procCards[i], procCards[i], 255, 1, 1, 11, 1);
-		}
-
-		//imshow("image", procCards[2]);
-		
+		}		
 	}
 
 
-
+	vector<Card*> deck; deck.clear(); deck = getDeck();
+	vector<PlayedCard*> playedCards; playedCards.clear();
 	// Save the original cards and the 180 degrees rotations
 	for (unsigned int i = 0; i < 4; i++) {
-		table[i][0] = procCards[i];
-
 		Mat rotatedCard;
 		rotateCard(procCards[i], 180.0f, rotatedCard);
-		table[i][1] = rotatedCard;
-
-		//imshow("image" + (i+1), table[i][0]);
-		//string name = "imageR" + (i + 1);
-		//namedWindow(name, CV_WINDOW_AUTOSIZE);
-		//imshow(name, table[i][1]);
-	}
-
-	
-	
-	// Now we need to do the comparisons
-	for (unsigned int i = 0; i < 4; i++) {
-		for (unsigned int j = 0; j < 2; j++) {
-
-			getAbsDifference(table[i][j], table[i][j]);
-			//getAbsDifference(table[i][j], table[i][j]);
-			break;
-
-
-		}
-		break;
+		playedCards.push_back( new PlayedCard(procCards[i], rotatedCard, deck) );
 	}
 	
 
@@ -277,4 +235,3 @@ bool compareAreas(vector<Point> v1, vector<Point> v2) {
 	return contourArea(v1, true) > contourArea(v2, true);
 
 }
-

@@ -12,7 +12,7 @@ private:
 	std::map <Card*, int> differences;
 public:
 	PlayedCard();
-	PlayedCard(cv::Mat, cv::Mat);
+	PlayedCard(cv::Mat, cv::Mat, std::vector<Card*>);
 	cv::Mat getOriginalImg();
 	cv::Mat getRotatedImg();
 	void setRotatedImg(cv::Mat img);

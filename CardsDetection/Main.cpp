@@ -13,7 +13,6 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-	string contentDir = "cards\\";
 	string test_dir = "test_samples\\";
 	Mat img = imread("cards/fulldeck.png", CV_LOAD_IMAGE_COLOR); 
 

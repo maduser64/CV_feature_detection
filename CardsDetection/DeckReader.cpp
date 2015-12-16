@@ -29,23 +29,23 @@ vector<Card*> readDeckFile() {
 		string card = "";
 		string suit = "";
 		switch (cardSize) {
-		case 2:
-			card = line.substr(0, 1);
-			suit = line.substr(1, 1);
-			score = getCardScore(card);
-			break;
-		case 3:
-			card = line.substr(0, 2);
-			suit = line.substr(2, 1);
-			score = getCardScore(card);
-			break;
-		case 5:
-			card = line;
-			suit = "none";
-			score = getCardScore(card);
-			break;
-		default:
-			break;
+			case 2:
+				card = line.substr(0, 1);
+				suit = line.substr(1, 1);
+				score = getCardScore(card);
+				break;
+			case 3:
+				card = line.substr(0, 2);
+				suit = line.substr(2, 1);
+				score = getCardScore(card);
+				break;
+			case 5:
+				card = line;
+				suit = "none";
+				score = getCardScore(card);
+				break;
+			default:
+				break;
 		}
 
 		deck.push_back(new Card(card, suit, score));

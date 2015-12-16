@@ -93,6 +93,8 @@ void processDeck(string imagesDir) {
 
 		adaptiveThreshold(deckArray, deckArray, 255, 1, 1, 11, 1);
 
+		//threshold(deckArray, deckArray, 130, 255, CV_THRESH_BINARY_INV);
+
 		imwrite("deck/deck_array.jpg", deckArray);
 
 	}
@@ -105,6 +107,27 @@ void rotateCard(Mat& src, double angle, Mat& dst) {
 
 	// Applies the previous obtained matrix and returns the rotated Mat
 	warpAffine(src, dst, r, src.size());
+}
+
+PlayedCard* getWinner(vector<PlayedCard*> playedCards) {
+	PlayedCard* winnerCard;
+	for (unsigned int i = 0; i < 4; i++) {
+		if (i == 0)
+			winnerCard = playedCards[i];
+		else {
+			if (playedCards[i]->getLeastDifferentCard()->getScore() > winnerCard->getLeastDifferentCard()->getScore())
+				winnerCard = playedCards[i];
+		}
+	}
+
+	return winnerCard;
+}
+
+Point getCenterPoint(PlayedCard* winnerCard) {
+	int centerX = (int) winnerCard->getCornerPoints()[0].x + ((winnerCard->getCornerPoints()[1].x - winnerCard->getCornerPoints()[0].x) / 2);
+	int centerY = (int) winnerCard->getCornerPoints()[1].y + ((winnerCard->getCornerPoints()[2].y - winnerCard->getCornerPoints()[1].y) / 2);
+
+	return Point((int) winnerCard->getCornerPoints()[1].x, centerY);
 }
 
 void imageBasedVersion(string imagesDir) {
@@ -131,22 +154,34 @@ void imageBasedVersion(string imagesDir) {
 	sort(contours.begin(), contours.end(), compareAreas);
 
 	Mat lambda;
+	
 	// Holds the 4 cards on present on table
 	Mat procCards[4];
-	// Holds 8 cards, the original one and a 180 degrees rotation on each one
-	Mat table[4][2];
+
+	// Holds the corners coordinats of each card
+	vector<vector<Point2f>> cornerPoints;
 
 	Point2f outputQuad[4] = { Point2f(0, 0), Point2f(CARD_X_SIZE - 1, 0), Point2f(CARD_X_SIZE - 1, CARD_Y_SIZE - 1), Point2f(0, CARD_Y_SIZE - 1) };
 
 	if (contours.size() >= 4) {
 		Scalar color = Scalar(255, 0, 0);
 		// draw the first 4 contours, this will hopefuly represent the 4 cards
-		for (unsigned int i = 0; i < 1; i++) {
-			//drawContours(img, contours, i, color, 4, 8, hierarchy, 0);
+		for (unsigned int i = 0; i < 4; i++) {
+			drawContours(img, contours, i, color, 4, 8, hierarchy, 0);
 			RotatedRect rotatedRect = minAreaRect(contours[i]);
 			Point2f rect_points[4];
 
+			// gets the corner points of each card
 			rotatedRect.points(rect_points);
+			// inserts it on a vector for later use, on card class construction
+
+
+			vector<Point2f> tempPoints;
+			for (unsigned int k = 0; k < 4; k++)
+				tempPoints.push_back(rect_points[k]);
+
+			cornerPoints.push_back(tempPoints);
+			// Rotates card to make it vertical
 			cardToVertical(rect_points);
 
 
@@ -159,25 +194,89 @@ void imageBasedVersion(string imagesDir) {
 				GaussianBlur(procCards[i], procCards[i], Size(j, j), 0.0, 0.0);
 
 			adaptiveThreshold(procCards[i], procCards[i], 255, 1, 1, 11, 1);
+			//threshold(procCards[i], procCards[i], 130, 255, CV_THRESH_BINARY_INV);
 		}		
 	}
 
 	vector<Card*> deck; deck.clear(); deck = getDeck();
 	vector<PlayedCard*> playedCards; playedCards.clear();
+
+
+	//Point2f points[] = { Point2f(1.0f, 2.0f), Point2f(1.0f, 2.0f), Point2f(1.0f, 2.0f), Point2f(1.0f, 2.0f) };
 	// Save the original cards and the 180 degrees rotations
-	for (unsigned int i = 0; i < 1; i++) {
+
+	for (unsigned int i = 0; i < 4; i++) {
 		Mat rotatedCard;
 		rotateCard(procCards[i], 180.0f, rotatedCard);
-		playedCards.push_back( new PlayedCard(procCards[i], rotatedCard, deck) );
+		// push back a new played card and 
+		playedCards.push_back(new PlayedCard(procCards[i], rotatedCard, cornerPoints[i], deck));
+	}
+
+
+	// Show matched cards info
+	for (unsigned int i = 0; i < 4; i++) {
+		string card = playedCards[i]->getLeastDifferentCard()->getCard();
+		string suit = playedCards[i]->getLeastDifferentCard()->getSuit();
+		int score = playedCards[i]->getLeastDifferentCard()->getScore();
+
+		cout << "Card: " << card << " | suit: " << suit << " | score: " << score << endl;
 	}
 
 	
+	PlayedCard* winnerCard = getWinner(playedCards);
+
+	cout << "--------------------------------" << endl;
+	cout << winnerCard->getCornerPoints()[0] << endl;
+	cout << winnerCard->getCornerPoints()[1] << endl;
+	cout << winnerCard->getCornerPoints()[2] << endl;
+	cout << winnerCard->getCornerPoints()[3] << endl;
+	cout << "--------------------------------" << endl;
+
+
+	putText(img, "Winner!", getCenterPoint(winnerCard), FONT_HERSHEY_SCRIPT_COMPLEX, 3.0, Scalar(0, 0, 255));
+
+
+
+	namedWindow("Conas", WINDOW_NORMAL);
+	imshow("Conas", img);
+	/*
+	namedWindow("Contours", WINDOW_NORMAL);
+	imshow("Contours", img);
+	
 	namedWindow("Original", WINDOW_AUTOSIZE);
 	imshow("Original", playedCards[0]->getOriginalImg());
+
 	Card* card = playedCards[0]->getLeastDifferentCard();
 	namedWindow("CardLeast", WINDOW_AUTOSIZE);
-	imshow("CardLeast", deck[29]->getCardImg());
 	imshow("CardLeast", card->getCardImg());
+
+	
+	
+	namedWindow("Original1", WINDOW_AUTOSIZE);
+	imshow("Original1", playedCards[1]->getOriginalImg());
+
+	Card* card1 = playedCards[1]->getLeastDifferentCard();
+	namedWindow("CardLeast1", WINDOW_AUTOSIZE);
+	imshow("CardLeast1", card1->getCardImg());
+
+	namedWindow("Original2", WINDOW_AUTOSIZE);
+	imshow("Original2", playedCards[2]->getOriginalImg());
+
+	Card* card2 = playedCards[2]->getLeastDifferentCard();
+	namedWindow("CardLeast2", WINDOW_AUTOSIZE);
+	imshow("CardLeast2", card2->getCardImg());
+
+	namedWindow("Original3", WINDOW_AUTOSIZE);
+	imshow("Original3", playedCards[3]->getOriginalImg());
+
+	Card* card3 = playedCards[3]->getLeastDifferentCard();
+	namedWindow("CardLeast3", WINDOW_AUTOSIZE);
+	imshow("CardLeast3", card3->getCardImg());
+*/
+	
+	
+
+
 }
 
 

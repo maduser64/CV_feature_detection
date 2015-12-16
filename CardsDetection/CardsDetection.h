@@ -36,4 +36,10 @@ void videoBasedVersion();
 /* Compares areas */
 bool compareAreas(std::vector<cv::Point>, std::vector<cv::Point>);
 
+/*Returns the card with highest score*/
+PlayedCard* getWinner(std::vector<PlayedCard*>);
+
+/*Returns a card's center point*/
+cv::Point getCenterPoint(PlayedCard*);
+
 #endif /* CARDS_DETECTION_H_ */

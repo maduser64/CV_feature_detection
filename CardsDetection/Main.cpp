@@ -9,16 +9,16 @@ using namespace cv;
 using namespace std;
 
 int main(int argc, char** argv) {
-
-	int MODE = 1;
-
 	string test_dir = "test_samples\\";
 	Mat img = imread("cards/fulldeck.png", CV_LOAD_IMAGE_COLOR); 
 
-	if (!deckPreProcessed(MODE)) {
+	int mode = -1;
+	mode = chooseExecutionMode();
+
+	if (!deckPreProcessed(mode)) {
 		cout << "Pre-processing deck, please wait" << endl;
 		string fullDeckPath = "deck/deck.jpg";
-		processDeck(fullDeckPath, MODE);
+		processDeck(fullDeckPath, mode);
 		cout << "Success!" << endl;
 	}
 
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 	switch (choice) {
 		case 1:
 			imgPath = getImgPath(test_dir);
-			imageBasedVersion(imgPath, MODE);
+			imageBasedVersion(imgPath, mode);
 			break;
 		case 2:
 			videoBasedVersion();

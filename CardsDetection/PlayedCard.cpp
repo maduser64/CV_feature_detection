@@ -20,14 +20,15 @@ PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point> contours, 
 	this->cornerPoints = cornerPoints;
 	this->contours = contours;
 
-	computeKeypoints();
-	computeDescriptors();
 	computeCentralPoint();
 	// Compute the difference with all deck cards
 	if (mode == 0)
 		computeAbsDifference(deck);
-	else if(mode == 1)
+	else if (mode == 1) {
+		computeKeypoints();
+		computeDescriptors();
 		computeDifferenceSurf(deck);
+	}
 }
 
 Mat PlayedCard::getOriginalImg() {

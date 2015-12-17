@@ -296,12 +296,10 @@ void imageBasedVersion(string imagesDir, int mode) {
 	putText(textImage, "Winner!", winnerCard->getCentralPoint(), FONT_HERSHEY_SCRIPT_COMPLEX, 3.0, Scalar(0, 0, 255));
 
 	rotateText(textImage, computeCardAngle(winnerCard), winnerCard->getCentralPoint(), textImage);
-
 	img = img + textImage;
 
 	namedWindow("Image", WINDOW_NORMAL);
 	imshow("Image", img);
-
 }
 
 

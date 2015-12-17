@@ -39,7 +39,6 @@ Mat appendImages(Mat deckArray, Mat card, int index) {
 	return deckArray;
 }
 
-
 void processDeck(string imagesDir, int mode) {
 	Mat img = imread(imagesDir, CV_LOAD_IMAGE_COLOR);
 	Mat findContoursMat;
@@ -120,7 +119,6 @@ void rotateText(Mat& src, double angle, Point2f originPoint, Mat& dst) {
 }
 
 bool auxMinYPointSort(Point2f pt1, Point2f pt2) { return (pt1.y < pt2.y); }
-
 bool auxMinXPointSort(Point2f pt1, Point2f pt2) { return (pt1.x < pt2.x); }
 
 double computeCardAngle(PlayedCard* card) {
@@ -234,7 +232,6 @@ void imageBasedVersion(string imagesDir, int mode) {
 			rotatedRect.points(rect_points);
 			// inserts it on a vector for later use, on card class construction
 
-
 			vector<Point2f> tempPoints;
 			for (unsigned int k = 0; k < 4; k++)
 				tempPoints.push_back(rect_points[k]);
@@ -242,7 +239,6 @@ void imageBasedVersion(string imagesDir, int mode) {
 			cornerPoints.push_back(tempPoints);
 			// Rotates card to make it vertical
 			cardToVertical(rect_points);
-
 
 			lambda = getPerspectiveTransform(rect_points, outputQuad);
 			warpPerspective(img, procCards[i], lambda, Size(450, 450));

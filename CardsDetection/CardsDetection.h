@@ -22,13 +22,13 @@ float distancePoints(cv::Point2f p1, cv::Point2f p2);
 cv::Mat appendImages(cv::Mat deckArray, cv::Mat card, int index);
 
 /* Receives one image with entire deck and saves an array with cards */
-void processDeck(std::string imagesDir);
+void processDeck(std::string imagesDir, int mode);
 
 /*Compares cards and returns the absolute difference between them*/
 int getAbsDifference(cv::Mat img1, cv::Mat img2);
 
 /* Road detection using uploaded images (.bmp, .jpg, .JPEG, .png, ...) */
-void imageBasedVersion(std::string);
+void imageBasedVersion(std::string, int mode);
 
 /* Road detection using video */
 void videoBasedVersion();

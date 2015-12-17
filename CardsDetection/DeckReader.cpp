@@ -3,8 +3,14 @@
 using namespace std;
 using namespace cv;
 
-bool deckPreProcessed() {
-	string deckArryPath = "deck/deck_array.jpg";
+bool deckPreProcessed(int mode) {
+
+	string deckArryPath = "";
+	if (mode == 0)
+		deckArryPath = "deck/deck_array_gray.jpg";
+	else if (mode == 1)
+		deckArryPath = "deck/deck_array_color.jpg";
+
 	if (fileExists(deckArryPath))
 		return true;
 	else
@@ -53,13 +59,22 @@ vector<Card*> readDeckFile() {
 	return deck;
 }
 
-vector<Card*> getDeck() {
+vector<Card*> getDeck(int mode) {
+	Mat deckImg;
+	string deckPath = "";
 	vector<Card*> deck = readDeckFile();
+
+	if (mode == 0) {
+		deckPath = "deck/deck_array_gray.jpg";
+		deckImg = imread(deckPath, CV_LOAD_IMAGE_GRAYSCALE);
+	}
+	else if (mode == 1) {
+		deckPath = "deck/deck_array_color.jpg";
+		deckImg = imread(deckPath, CV_LOAD_IMAGE_COLOR);
+	}
 
 	int x = 0;
 	int y = 0;
-	string deckPath = "deck/deck_array.jpg"; 
-	Mat deckImg = imread(deckPath, CV_LOAD_IMAGE_COLOR);
 	for (int i = 0; i < deck.size(); i++) {
 		y = 0;
 		x = 450 * i;

@@ -10,14 +10,15 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
+	int MODE = 0;
+
 	string test_dir = "test_samples\\";
 	Mat img = imread("cards/fulldeck.png", CV_LOAD_IMAGE_COLOR); 
 
-
-	if (!deckPreProcessed()) {
+	if (!deckPreProcessed(MODE)) {
 		cout << "Pre-processing deck, please wait" << endl;
 		string fullDeckPath = "deck/deck.jpg";
-		processDeck(fullDeckPath);
+		processDeck(fullDeckPath, MODE);
 		cout << "Success!" << endl;
 	}
 
@@ -27,7 +28,7 @@ int main(int argc, char** argv) {
 	switch (choice) {
 		case 1:
 			imgPath = getImgPath(test_dir);
-			imageBasedVersion(imgPath);
+			imageBasedVersion(imgPath, MODE);
 			break;
 		case 2:
 			videoBasedVersion();

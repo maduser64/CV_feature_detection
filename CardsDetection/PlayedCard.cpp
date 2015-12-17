@@ -12,15 +12,18 @@ PlayedCard::PlayedCard () {
 	this->differences.clear();
 }
 
-PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point2f> cornerPoints, vector<Card*> deck) {
+// mode = 0 -> Use subtraction / mode = 1 -> Use surf
+PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point2f> cornerPoints, vector<Card*> deck, int mode) { 
 	this->originalImg = originalImg;
 	this->rotatedImg = rotatedImg;
 	this->leastDifferentCard = NULL;
 	this->cornerPoints = cornerPoints;
 
 	// Compute the difference with all deck cards
-	//computeAbsDifference(deck);
-	computeDifferenceSurf(deck);
+	if (mode == 0)
+		computeAbsDifference(deck);
+	else if(mode == 1)
+		computeDifferenceSurf(deck);
 }
 
 Mat PlayedCard::getOriginalImg() {
@@ -137,45 +140,27 @@ Mat PlayedCard::filterMatchesRANSAC(vector<DMatch> &matches, vector<KeyPoint> &k
 }
 
 void PlayedCard::computeAbsDifference(vector<Card*> deck) {
+	
 	for (int i = 0; i < deck.size(); i++) {
 		Mat diff;
 		Mat diffRotated;
 
 		absdiff(this->originalImg, deck[i]->getCardImg(), diff);
-		
-
 		absdiff(this->rotatedImg, deck[i]->getCardImg(), diffRotated);
-
 
 		GaussianBlur(diff, diff, Size(5, 5), 5);
 		threshold(diff, diff, 200, 255, CV_THRESH_BINARY);
 
-		
-		if (i == 42)
-			imshow("difference wrong", diff);
-
-		if (i == 14)
-			imshow("difference ACE", diff);
-
-
 		GaussianBlur(diffRotated, diffRotated, Size(5, 5), 5);
 		threshold(diffRotated, diffRotated, 200, 255, CV_THRESH_BINARY);
 
-		//if (i == 16)
-			//imshow("difference rotated", diffRotated);
-
-		//if (i == 5)
-			//imshow("difference ACE rotated", diff);
-
-	
 		Scalar sOriginal(sum(diff));
 		Scalar sRotated(sum(diffRotated));
 
-		int diffValue = ((int) sOriginal[0] + (int) sRotated[0]) / 2;
-
-		
+		int diffValue = ((int) sOriginal[0] + (int) sRotated[0]) / 2;	
 		differences.insert(pair<Card*, int>(deck[i], diffValue));
 	}
+
 	pair<Card*, int> min = *min_element(differences.begin(), differences.end(), pairCompare);
 	this->leastDifferentCard = min.first;
 }

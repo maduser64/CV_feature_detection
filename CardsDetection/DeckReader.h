@@ -10,14 +10,14 @@
 #include "Card.h"
 #include "Opencv.h"
 
-bool deckPreProcessed();
+bool deckPreProcessed(int);
 
-std::vector<Card*> getDeck();
+std::vector<Card*> getDeck(int);
 
 std::vector<Card*> readDeckFile();
 
 int getCardScore(std::string);
 
-inline bool fileExists(const std::string& name);
+inline bool fileExists(const std::string&);
 
 #endif /* DECK_READER_H_ */

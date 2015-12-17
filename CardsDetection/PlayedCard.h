@@ -15,8 +15,8 @@ private:
 public:
 	/*Default constructor*/
 	PlayedCard();
-	/*Receives the original card, rotated card and the deck array*/
-	PlayedCard(cv::Mat, cv::Mat, std::vector<cv::Point2f>, std::vector<Card*>);
+	/*Receives the original card, rotated card and the deck array // mode = 0 -> Use subtraction / mode = 1 -> Use surf */
+	PlayedCard(cv::Mat, cv::Mat, std::vector<cv::Point2f>, std::vector<Card*>, int);
 	/*Returns the unrotated card*/
 	cv::Mat getOriginalImg();
 	/*Returns the rotated card*/
@@ -37,5 +37,6 @@ public:
 	int computeSurfGoodMatches(cv::Mat, cv::Mat);
 	void filterMatchesByAbsoluteValue(std::vector<cv::DMatch>&, float);
 	cv::Mat filterMatchesRANSAC(std::vector<cv::DMatch>&, std::vector<cv::KeyPoint>&, std::vector<cv::KeyPoint>&);
+
 	~PlayedCard();
 };

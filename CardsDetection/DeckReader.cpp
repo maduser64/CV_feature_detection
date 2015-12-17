@@ -83,6 +83,8 @@ vector<Card*> getDeck(int mode) {
 		Mat individual_card(deckImg(cardROI));
 
 		deck[i]->setImg(individual_card);
+		deck[i]->computeKeypoints();
+		deck[i]->computeDescriptors();
 	}
 	return deck;
 }

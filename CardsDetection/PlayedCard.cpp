@@ -19,6 +19,9 @@ PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point2f> cornerPo
 	this->leastDifferentCard = NULL;
 	this->cornerPoints = cornerPoints;
 
+	computeKeypoints();
+	computeDescriptors();
+
 	// Compute the difference with all deck cards
 	if (mode == 0)
 		computeAbsDifference(deck);
@@ -50,11 +53,40 @@ std::vector<cv::Point2f> PlayedCard::getCornerPoints() {
 	return this->cornerPoints;
 }
 
+vector<KeyPoint> PlayedCard::getKeypointsOriginal() {
+	return keypointsOriginal;
+}
+
+cv::Mat PlayedCard::getDescriptorsOriginal() {
+	return descriptorsOriginal;
+}
+
+vector<KeyPoint> PlayedCard::getKeypointsRotated() {
+	return keypointsRotated;
+}
+
+cv::Mat PlayedCard::getDescriptorsRotated() {
+	return descriptorsRotated;
+}
+
+void PlayedCard::computeKeypoints() {
+	int minHessian = 1000;
+	SurfFeatureDetector detector(minHessian);
+	detector.detect(originalImg, keypointsOriginal);
+	detector.detect(rotatedImg, keypointsRotated);
+}
+
+void PlayedCard::computeDescriptors() {
+	SurfDescriptorExtractor extractor;
+	extractor.compute(originalImg, keypointsOriginal, descriptorsOriginal);
+	extractor.compute(rotatedImg, keypointsRotated, descriptorsRotated);
+}
+
 void PlayedCard::computeDifferenceSurf(vector<Card*> deck) {
 
 	for (int i = 0; i < deck.size(); i++) {
-		int goodMatchesOriginal = computeSurfGoodMatches(this->originalImg, deck[i]->getCardImg());
-		int goodMatchesRotated = computeSurfGoodMatches(this->rotatedImg, deck[i]->getCardImg());
+		int goodMatchesOriginal = computeSurfGoodMatches(keypointsOriginal, deck[i]->getKeypoints(), descriptorsOriginal, deck[i]->getDescriptors());
+		int goodMatchesRotated = computeSurfGoodMatches(keypointsRotated, deck[i]->getKeypoints(), descriptorsRotated, deck[i]->getDescriptors());
 
 		if (goodMatchesOriginal >= goodMatchesRotated)
 			differences.insert(pair<Card*, int>(deck[i], goodMatchesOriginal));
@@ -68,22 +100,7 @@ void PlayedCard::computeDifferenceSurf(vector<Card*> deck) {
 
 }
 
-int PlayedCard::computeSurfGoodMatches(Mat img, Mat img1) {
-
-	//-- Step 1: Detect the keypoints using SURF Detector
-	int minHessian = 1000;
-	SurfFeatureDetector detector(minHessian);
-	vector<KeyPoint> keypoints_1, keypoints_2;
-
-	detector.detect(img, keypoints_1);
-	detector.detect(img1, keypoints_2);
-
-	//-- Step 2: Calculate descriptors (feature vectors)
-	SurfDescriptorExtractor extractor;
-
-	Mat descriptors_1, descriptors_2;
-	extractor.compute(img, keypoints_1, descriptors_1);
-	extractor.compute(img1, keypoints_2, descriptors_2);
+int PlayedCard::computeSurfGoodMatches(vector<KeyPoint> keypoints_1, vector<KeyPoint> keypoints_2, Mat descriptors_1, Mat descriptors_2) {
 
 	//-- Step 3: Matching descriptor vectors using FLANN matcher
 	FlannBasedMatcher matcher;

@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-	int MODE = 0;
+	int MODE = 1;
 
 	string test_dir = "test_samples\\";
 	Mat img = imread("cards/fulldeck.png", CV_LOAD_IMAGE_COLOR); 

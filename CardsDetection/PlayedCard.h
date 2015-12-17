@@ -12,6 +12,10 @@ private:
 	std::map <Card*, int> differences;
 	Card* leastDifferentCard;
 	std::vector < cv::Point2f > cornerPoints;
+	std::vector<cv::KeyPoint> keypointsOriginal;
+	std::vector<cv::KeyPoint> keypointsRotated;
+	cv::Mat descriptorsOriginal;
+	cv::Mat descriptorsRotated;
 public:
 	/*Default constructor*/
 	PlayedCard();
@@ -31,10 +35,17 @@ public:
 	std::map<Card*, int> getCardDifferences();
 	/*Computer the absolute difference, mean between the sum of the difference of both rotated and unrotated card*/
 	void computeAbsDifference(std::vector<Card*>);
+	
+	std::vector<cv::KeyPoint> getKeypointsOriginal();
+	cv::Mat getDescriptorsOriginal();
+	std::vector<cv::KeyPoint> getKeypointsRotated();
+	cv::Mat getDescriptorsRotated();
+	void computeKeypoints();
+	void computeDescriptors();
 
 	/*Computer the difference using SURF*/
 	void computeDifferenceSurf(std::vector<Card*>);
-	int computeSurfGoodMatches(cv::Mat, cv::Mat);
+	int computeSurfGoodMatches(std::vector<cv::KeyPoint>, std::vector<cv::KeyPoint>, cv::Mat, cv::Mat);
 	void filterMatchesByAbsoluteValue(std::vector<cv::DMatch>&, float);
 	cv::Mat filterMatchesRANSAC(std::vector<cv::DMatch>&, std::vector<cv::KeyPoint>&, std::vector<cv::KeyPoint>&);
 

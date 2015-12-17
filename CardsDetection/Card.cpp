@@ -46,3 +46,21 @@ Mat Card::getCardImg() {
 void Card::setImg(Mat img) {
 	this->img = img;
 }
+
+vector<KeyPoint> Card::getKeypoints() {
+	return keypoints;
+}
+cv::Mat Card::getDescriptors() {
+	return descriptors;
+}
+
+void Card::computeKeypoints() {
+	int minHessian = 1000;
+	SurfFeatureDetector detector(minHessian);
+	detector.detect(img, keypoints);
+}
+
+void Card::computeDescriptors() {
+	SurfDescriptorExtractor extractor;
+	extractor.compute(img, keypoints, descriptors);
+}

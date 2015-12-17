@@ -1,4 +1,5 @@
 #include "CardsDetection.h"
+#include <math.h>
 
 using namespace cv;
 using namespace std;
@@ -109,6 +110,60 @@ void rotateCard(Mat& src, double angle, Mat& dst) {
 	warpAffine(src, dst, r, src.size());
 }
 
+void rotateText(Mat& src, double angle, Point2f originPoint, Mat& dst) {
+
+	// Returns the rotation matrix that represents the specified rotation
+	Mat r = getRotationMatrix2D(originPoint, angle, 1.0);
+
+	// Applies the previous obtained matrix and returns the rotated Mat
+	warpAffine(src, dst, r, src.size());
+}
+
+bool auxMinYPointSort(Point2f pt1, Point2f pt2) { return (pt1.y < pt2.y); }
+
+bool auxMinXPointSort(Point2f pt1, Point2f pt2) { return (pt1.x < pt2.x); }
+
+double computeCardAngle(PlayedCard* card) {
+
+	double pi = 3.141592653589793238462643383279502884;
+
+	/*Min y*/
+	Point2f p1MinY, p2MinY;
+	p1MinY = Point2f();
+	p2MinY = Point2f();
+
+	/*Min x*/
+	Point2f p1MinX, p2MinX;
+	p1MinX = Point2f();
+	p2MinX = Point2f();
+
+	vector<Point2f> cardYMinPoints = card->getCornerPoints();
+	vector<Point2f> cardXMinPoints = card->getCornerPoints();
+
+	sort(cardYMinPoints.begin(), cardYMinPoints.end(), auxMinYPointSort);
+	sort(cardXMinPoints.begin(), cardXMinPoints.end(), auxMinXPointSort);
+
+	p1MinY = Point((int) cardYMinPoints[0].x, (int) cardYMinPoints[0].y);
+	p2MinY = Point((int) cardYMinPoints[1].x, (int) cardYMinPoints[1].y);
+
+	p1MinX = Point((int) cardXMinPoints[0].x, (int) cardXMinPoints[0].y);
+	p2MinX = Point((int) cardXMinPoints[1].x, (int) cardXMinPoints[1].y);
+
+
+	float distY = distancePoints(p1MinY, p2MinY);
+	float distX = distancePoints(p1MinX, p2MinX);
+
+	float angle = 0;
+	if (distY < distX)
+		angle = atan((p2MinY.y - p1MinY.y) / (p2MinY.x - p1MinY.x));
+	else
+		angle = atan((p2MinX.y - p1MinX.y) / (p2MinX.x - p1MinX.x));
+	
+	
+	return -angle * (180/pi);
+
+}
+
 PlayedCard* getWinner(vector<PlayedCard*> playedCards) {
 	PlayedCard* winnerCard = new PlayedCard();
 	for (unsigned int i = 0; i < 4; i++) {
@@ -124,8 +179,9 @@ PlayedCard* getWinner(vector<PlayedCard*> playedCards) {
 }
 
 Point getCenterPoint(PlayedCard* winnerCard) {
-	int centerX = (int) winnerCard->getCornerPoints()[0].x + (int) ((winnerCard->getCornerPoints()[1].x - winnerCard->getCornerPoints()[0].x) / 2);
-	int centerY = (int) winnerCard->getCornerPoints()[1].y + (int) ((winnerCard->getCornerPoints()[2].y - winnerCard->getCornerPoints()[1].y) / 2);
+
+	int centerX = (int) (winnerCard->getCornerPoints()[0].x + ((winnerCard->getCornerPoints()[1].x - winnerCard->getCornerPoints()[0].x) / 2));
+	int centerY = (int) (winnerCard->getCornerPoints()[1].y + ((winnerCard->getCornerPoints()[2].y - winnerCard->getCornerPoints()[1].y) / 2));
 
 	return Point((int) winnerCard->getCornerPoints()[1].x, centerY);
 }
@@ -206,14 +262,12 @@ void imageBasedVersion(string imagesDir, int mode) {
 	vector<Card*> deck; deck.clear(); deck = getDeck(mode);
 	vector<PlayedCard*> playedCards; playedCards.clear();
 
-	//Point2f points[] = { Point2f(1.0f, 2.0f), Point2f(1.0f, 2.0f), Point2f(1.0f, 2.0f), Point2f(1.0f, 2.0f) };
 	// Save the original cards and the 180 degrees rotations
-
 	for (unsigned int i = 0; i < 4; i++) {
 		Mat rotatedCard;
 		rotateCard(procCards[i], 180.0f, rotatedCard);
 		// push back a new played card and 
-		playedCards.push_back(new PlayedCard(procCards[i], rotatedCard, cornerPoints[i], deck, mode));
+		playedCards.push_back(new PlayedCard(procCards[i], rotatedCard, contours[i], cornerPoints[i], deck, mode));
 	}
 
 
@@ -223,6 +277,10 @@ void imageBasedVersion(string imagesDir, int mode) {
 		string suit = playedCards[i]->getLeastDifferentCard()->getSuit();
 		int score = playedCards[i]->getLeastDifferentCard()->getScore();
 		cout << "Card: " << card << " | suit: " << suit << " | score: " << score << endl;
+
+		for (int j = 0; j < 4; j++) 
+			circle(img, playedCards[i]->getCornerPoints()[j], 10, Scalar(255, 0, 0), 10);
+		
 	}
 
 	PlayedCard* winnerCard = getWinner(playedCards);
@@ -234,10 +292,16 @@ void imageBasedVersion(string imagesDir, int mode) {
 	cout << winnerCard->getCornerPoints()[3] << endl;
 	cout << "--------------------------------" << endl;
 
-	putText(img, "Winner!", getCenterPoint(winnerCard), FONT_HERSHEY_SCRIPT_COMPLEX, 3.0, Scalar(0, 0, 255));
+	Mat textImage = Mat::zeros(img.rows, img.cols, img.type());
+	putText(textImage, "Winner!", winnerCard->getCentralPoint(), FONT_HERSHEY_SCRIPT_COMPLEX, 3.0, Scalar(0, 0, 255));
 
-	namedWindow("Result", WINDOW_NORMAL);
-	imshow("Result", img);
+	rotateText(textImage, computeCardAngle(winnerCard), winnerCard->getCentralPoint(), textImage);
+
+	img = img + textImage;
+
+	namedWindow("Image", WINDOW_NORMAL);
+	imshow("Image", img);
+
 }
 
 
@@ -294,7 +358,5 @@ void videoBasedVersion() {
 
 // receives v1 and v2 point vectors and if v1 greater v2 return true
 bool compareAreas(vector<Point> v1, vector<Point> v2) {
-
 	return contourArea(v1, true) > contourArea(v2, true);
-
 }

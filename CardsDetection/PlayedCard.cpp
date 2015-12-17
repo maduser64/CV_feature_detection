@@ -13,15 +13,16 @@ PlayedCard::PlayedCard () {
 }
 
 // mode = 0 -> Use subtraction / mode = 1 -> Use surf
-PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point2f> cornerPoints, vector<Card*> deck, int mode) { 
+PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point> contours, vector<Point2f> cornerPoints, vector<Card*> deck, int mode) {
 	this->originalImg = originalImg;
 	this->rotatedImg = rotatedImg;
 	this->leastDifferentCard = NULL;
 	this->cornerPoints = cornerPoints;
+	this->contours = contours;
 
 	computeKeypoints();
 	computeDescriptors();
-
+	computeCentralPoint();
 	// Compute the difference with all deck cards
 	if (mode == 0)
 		computeAbsDifference(deck);
@@ -188,6 +189,23 @@ void PlayedCard::computeAbsDifference(vector<Card*> deck) {
 
 Card* PlayedCard::getLeastDifferentCard() {
 	return leastDifferentCard;
+}
+
+void PlayedCard::computeCentralPoint() {
+	int x = 0;
+	int y = 0;
+	for (int i = 0; i < this->contours.size(); i++) {
+		x += contours[i].x;
+		y += contours[i].y;
+	}
+
+	Point center = Point( (int) (x / this->contours.size()), y / (int) (this->contours.size()));
+
+	this->centralPoint = center;
+}
+
+Point PlayedCard::getCentralPoint(){
+	return this->centralPoint;
 }
 
 PlayedCard::~PlayedCard() 

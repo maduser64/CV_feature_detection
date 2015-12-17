@@ -13,7 +13,13 @@ extern int MAX_KERNEL_SIZE;
 void cardToVertical(cv::Point2f*);
 
 /*Rotates a given image with received degrees*/
+void rotateCard(cv::Mat&, double, cv::Mat&);
+
+/*Rotates a given received text material*/
 void rotateCard(cv::Mat&, double angle, cv::Mat& dst);
+
+/*Returns the rotation of a given card*/
+double computeCardAngle(PlayedCard*);
 
 /* Returns the distance between 2 points */
 float distancePoints(cv::Point2f p1, cv::Point2f p2);

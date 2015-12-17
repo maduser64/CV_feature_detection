@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
 	string test_dir = "test_samples\\";
 	Mat img = imread("cards/fulldeck.png", CV_LOAD_IMAGE_COLOR); 
 
+
 	if (!deckPreProcessed()) {
 		cout << "Pre-processing deck, please wait" << endl;
 		string fullDeckPath = "deck/deck.jpg";

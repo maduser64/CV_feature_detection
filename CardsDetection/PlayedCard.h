@@ -31,5 +31,11 @@ public:
 	std::map<Card*, int> getCardDifferences();
 	/*Computer the absolute difference, mean between the sum of the difference of both rotated and unrotated card*/
 	void computeAbsDifference(std::vector<Card*>);
+
+	/*Computer the difference using SURF*/
+	void computeDifferenceSurf(std::vector<Card*>);
+	int computeSurfGoodMatches(cv::Mat, cv::Mat);
+	void filterMatchesByAbsoluteValue(std::vector<cv::DMatch>&, float);
+	cv::Mat filterMatchesRANSAC(std::vector<cv::DMatch>&, std::vector<cv::KeyPoint>&, std::vector<cv::KeyPoint>&);
 	~PlayedCard();
 };

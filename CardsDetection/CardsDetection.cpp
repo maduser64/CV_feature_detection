@@ -86,12 +86,12 @@ void processDeck(string imagesDir) {
 			appendImages(deckArray, outputCard, i);
 		}
 
-		cvtColor(deckArray, deckArray, CV_RGB2GRAY);
+		//cvtColor(deckArray, deckArray, CV_RGB2GRAY);
 
-		for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
-			GaussianBlur(deckArray, deckArray, Size(i, i), 0.0, 0.0);
+		//for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
+			//GaussianBlur(deckArray, deckArray, Size(i, i), 0.0, 0.0);
 
-		adaptiveThreshold(deckArray, deckArray, 255, 1, 1, 11, 1);
+		//adaptiveThreshold(deckArray, deckArray, 255, 1, 1, 11, 1);
 
 		//threshold(deckArray, deckArray, 130, 255, CV_THRESH_BINARY_INV);
 
@@ -135,12 +135,12 @@ void imageBasedVersion(string imagesDir) {
 	Mat findContoursMat;
 	img.copyTo(findContoursMat);
 
-	cvtColor(findContoursMat, findContoursMat, CV_RGB2GRAY);
+	//cvtColor(findContoursMat, findContoursMat, CV_RGB2GRAY);
 
-	for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
-		GaussianBlur(findContoursMat, findContoursMat, Size(i, i), 0.0, 0.0);
+	//for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
+		//GaussianBlur(findContoursMat, findContoursMat, Size(i, i), 0.0, 0.0);
 
-	threshold(findContoursMat, findContoursMat, 120, 255, CV_THRESH_BINARY);
+	//threshold(findContoursMat, findContoursMat, 120, 255, CV_THRESH_BINARY);
 
 	Canny(findContoursMat, findContoursMat, 50, 250);
 
@@ -188,12 +188,12 @@ void imageBasedVersion(string imagesDir) {
 			lambda = getPerspectiveTransform(rect_points, outputQuad);
 			warpPerspective(img, procCards[i], lambda, Size(450, 450));
 
-			cvtColor(procCards[i], procCards[i], CV_RGB2GRAY);
+			//cvtColor(procCards[i], procCards[i], CV_RGB2GRAY);
 
-			for (int j = 1; j < MAX_KERNEL_SIZE; j = j + 2)
-				GaussianBlur(procCards[i], procCards[i], Size(j, j), 0.0, 0.0);
+			//for (int j = 1; j < MAX_KERNEL_SIZE; j = j + 2)
+				//GaussianBlur(procCards[i], procCards[i], Size(j, j), 0.0, 0.0);
 
-			adaptiveThreshold(procCards[i], procCards[i], 255, 1, 1, 11, 1);
+			//adaptiveThreshold(procCards[i], procCards[i], 255, 1, 1, 11, 1);
 			//threshold(procCards[i], procCards[i], 130, 255, CV_THRESH_BINARY_INV);
 		}		
 	}

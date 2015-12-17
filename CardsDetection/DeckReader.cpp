@@ -59,7 +59,7 @@ vector<Card*> getDeck() {
 	int x = 0;
 	int y = 0;
 	string deckPath = "deck/deck_array.jpg"; 
-	Mat deckImg = imread(deckPath, CV_LOAD_IMAGE_GRAYSCALE);
+	Mat deckImg = imread(deckPath, CV_LOAD_IMAGE_COLOR);
 	for (int i = 0; i < deck.size(); i++) {
 		y = 0;
 		x = 450 * i;

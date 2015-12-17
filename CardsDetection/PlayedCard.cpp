@@ -3,6 +3,8 @@
 using namespace std;
 using namespace cv;
 
+int computeSurfGoodMatches(Mat, Mat);
+
 PlayedCard::PlayedCard () {
 	this->originalImg = NULL;
 	this->rotatedImg = NULL;
@@ -16,8 +18,9 @@ PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point2f> cornerPo
 	this->leastDifferentCard = NULL;
 	this->cornerPoints = cornerPoints;
 
-	// Compute the difference between all deck cards
-	computeAbsDifference(deck);
+	// Compute the difference with all deck cards
+	//computeAbsDifference(deck);
+	computeDifferenceSurf(deck);
 }
 
 Mat PlayedCard::getOriginalImg() {
@@ -44,6 +47,94 @@ std::vector<cv::Point2f> PlayedCard::getCornerPoints() {
 	return this->cornerPoints;
 }
 
+void PlayedCard::computeDifferenceSurf(vector<Card*> deck) {
+
+	for (int i = 0; i < deck.size(); i++) {
+		int goodMatchesOriginal = computeSurfGoodMatches(this->originalImg, deck[i]->getCardImg());
+		int goodMatchesRotated = computeSurfGoodMatches(this->rotatedImg, deck[i]->getCardImg());
+
+		if (goodMatchesOriginal >= goodMatchesRotated)
+			differences.insert(pair<Card*, int>(deck[i], goodMatchesOriginal));
+		else 
+			differences.insert(pair<Card*, int>(deck[i], goodMatchesRotated));
+	}
+
+	pair<Card*, int> max = *max_element(differences.begin(), differences.end(), pairCompare);
+	this->leastDifferentCard = max.first;
+	printf("Match: %s %s \n", this->leastDifferentCard->getCard(), this->leastDifferentCard->getSuit());
+
+}
+
+int PlayedCard::computeSurfGoodMatches(Mat img, Mat img1) {
+
+	//-- Step 1: Detect the keypoints using SURF Detector
+	int minHessian = 1000;
+	SurfFeatureDetector detector(minHessian);
+	vector<KeyPoint> keypoints_1, keypoints_2;
+
+	detector.detect(img, keypoints_1);
+	detector.detect(img1, keypoints_2);
+
+	//-- Step 2: Calculate descriptors (feature vectors)
+	SurfDescriptorExtractor extractor;
+
+	Mat descriptors_1, descriptors_2;
+	extractor.compute(img, keypoints_1, descriptors_1);
+	extractor.compute(img1, keypoints_2, descriptors_2);
+
+	//-- Step 3: Matching descriptor vectors using FLANN matcher
+	FlannBasedMatcher matcher;
+	vector< DMatch > matches;
+	matcher.match(descriptors_1, descriptors_2, matches);
+
+	filterMatchesByAbsoluteValue(matches, 0.125);
+	filterMatchesRANSAC(matches, keypoints_1, keypoints_2);
+
+	//Mat img_matches;
+	//drawMatches(img, keypoints_1, img1, keypoints_2, matches, img_matches, Scalar::all(-1), Scalar::all(-1), vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+	//imshow("matches", img_matches);
+	//printf("Good Matches: %d \n", (int)matches.size());
+	//waitKey(0);
+
+	return (int)matches.size();
+}
+
+void PlayedCard::filterMatchesByAbsoluteValue(vector<DMatch> &matches, float maxDistance) {
+	vector<DMatch> filteredMatches;
+	for (size_t i = 0; i<matches.size(); i++)
+	{
+		if (matches[i].distance < maxDistance)
+			filteredMatches.push_back(matches[i]);
+	}
+	matches = filteredMatches;
+}
+
+Mat PlayedCard::filterMatchesRANSAC(vector<DMatch> &matches, vector<KeyPoint> &keypointsA, vector<KeyPoint> &keypointsB) {
+	Mat homography;
+	std::vector<DMatch> filteredMatches;
+	if (matches.size() >= 4)
+	{
+		vector<Point2f> srcPoints;
+		vector<Point2f> dstPoints;
+		for (size_t i = 0; i<matches.size(); i++)
+		{
+
+			srcPoints.push_back(keypointsA[matches[i].queryIdx].pt);
+			dstPoints.push_back(keypointsB[matches[i].trainIdx].pt);
+		}
+
+		Mat mask;
+		homography = findHomography(srcPoints, dstPoints, CV_RANSAC, 1.0, mask);
+
+		for (int i = 0; i<mask.rows; i++)
+		{
+			if (mask.ptr<uchar>(i)[0] == 1)
+				filteredMatches.push_back(matches[i]);
+		}
+	}
+	matches = filteredMatches;
+	return homography;
+}
 
 void PlayedCard::computeAbsDifference(vector<Card*> deck) {
 	for (int i = 0; i < deck.size(); i++) {
@@ -76,8 +167,7 @@ void PlayedCard::computeAbsDifference(vector<Card*> deck) {
 		//if (i == 5)
 			//imshow("difference ACE rotated", diff);
 
-		
-
+	
 		Scalar sOriginal(sum(diff));
 		Scalar sRotated(sum(diffRotated));
 

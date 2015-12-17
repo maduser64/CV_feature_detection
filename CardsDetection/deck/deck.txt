@@ -5,9 +5,9 @@ Joker
 AE
 KP
 5O
-1E
-1O
-1P
+QE
+QO
+QP
 7O
 KO
 6O

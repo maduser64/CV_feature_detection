@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 			imageBasedVersion(imgPath, mode);
 			break;
 		case 2:
-			videoBasedVersion();
+			videoBasedVersion(mode);
 			break;
 		default:
 			break;

@@ -7,6 +7,7 @@
 
 int initCli();
 int chooseExecutionMode();
+bool continueWebcam();
 std::string getImgPath(std::string);
 inline bool fileExists(const std::string& name);
 

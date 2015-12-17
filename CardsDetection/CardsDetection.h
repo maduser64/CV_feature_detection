@@ -6,6 +6,7 @@
 #include "DeckReader.h"
 #include "PlayedCard.h"
 #include "Opencv.h"
+#include "Cli.h"
 
 extern int MAX_KERNEL_SIZE;
 
@@ -16,28 +17,31 @@ void cardToVertical(cv::Point2f*);
 void rotateCard(cv::Mat&, double, cv::Mat&);
 
 /*Rotates a given received text material*/
-void rotateCard(cv::Mat&, double angle, cv::Mat& dst);
+void rotateCard(cv::Mat&, double, cv::Mat&);
 
 /*Returns the rotation of a given card*/
 double computeCardAngle(PlayedCard*);
 
 /* Returns the distance between 2 points */
-float distancePoints(cv::Point2f p1, cv::Point2f p2);
+float distancePoints(cv::Point2f, cv::Point2f);
 
 /*Aux function to processDeck function, appends a card by card on array of cards*/
-cv::Mat appendImages(cv::Mat deckArray, cv::Mat card, int index);
+cv::Mat appendImages(cv::Mat, cv::Mat, int);
 
 /* Receives one image with entire deck and saves an array with cards */
-void processDeck(std::string imagesDir, int mode);
+void processDeck(std::string, int);
 
 /*Compares cards and returns the absolute difference between them*/
-int getAbsDifference(cv::Mat img1, cv::Mat img2);
+int getAbsDifference(cv::Mat, cv::Mat);
 
 /* Road detection using uploaded images (.bmp, .jpg, .JPEG, .png, ...) */
-void imageBasedVersion(std::string, int mode);
+void imageBasedVersion(std::string, int);
 
 /* Road detection using video */
-void videoBasedVersion();
+void videoBasedVersion(int);
+
+/* Process video frame */
+void processVideo(cv::Mat, int);
 
 /* Compares areas */
 bool compareAreas(std::vector<cv::Point>, std::vector<cv::Point>);

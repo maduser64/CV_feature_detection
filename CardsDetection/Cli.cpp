@@ -60,6 +60,21 @@ int chooseExecutionMode() {
 	return choice;
 }
 
+bool continueWebcam() {
+	char choice = ' ';
+	while (true) {
+		cout << "Do you want to continue using webcam? (Y / N)" << endl;
+		cout << ">>";
+		cin >> choice;
+
+		tolower(choice);
+		if (choice == 'y')
+			return true;
+		else if (choice == 'n')
+			return false;
+	}
+}
+
 string getImgPath(string dir) {
 	string imgPath = "";
 	string filePath = "";

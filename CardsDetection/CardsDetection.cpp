@@ -110,7 +110,7 @@ void rotateCard(Mat& src, double angle, Mat& dst) {
 }
 
 PlayedCard* getWinner(vector<PlayedCard*> playedCards) {
-	PlayedCard* winnerCard;
+	PlayedCard* winnerCard = new PlayedCard();
 	for (unsigned int i = 0; i < 4; i++) {
 		if (i == 0)
 			winnerCard = playedCards[i];
@@ -124,8 +124,8 @@ PlayedCard* getWinner(vector<PlayedCard*> playedCards) {
 }
 
 Point getCenterPoint(PlayedCard* winnerCard) {
-	int centerX = (int) winnerCard->getCornerPoints()[0].x + ((winnerCard->getCornerPoints()[1].x - winnerCard->getCornerPoints()[0].x) / 2);
-	int centerY = (int) winnerCard->getCornerPoints()[1].y + ((winnerCard->getCornerPoints()[2].y - winnerCard->getCornerPoints()[1].y) / 2);
+	int centerX = (int) winnerCard->getCornerPoints()[0].x + (int) ((winnerCard->getCornerPoints()[1].x - winnerCard->getCornerPoints()[0].x) / 2);
+	int centerY = (int) winnerCard->getCornerPoints()[1].y + (int) ((winnerCard->getCornerPoints()[2].y - winnerCard->getCornerPoints()[1].y) / 2);
 
 	return Point((int) winnerCard->getCornerPoints()[1].x, centerY);
 }

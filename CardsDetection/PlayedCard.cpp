@@ -88,10 +88,14 @@ void PlayedCard::computeDifferenceSurf(vector<Card*> deck) {
 		int goodMatchesOriginal = computeSurfGoodMatches(keypointsOriginal, deck[i]->getKeypoints(), descriptorsOriginal, deck[i]->getDescriptors());
 		int goodMatchesRotated = computeSurfGoodMatches(keypointsRotated, deck[i]->getKeypoints(), descriptorsRotated, deck[i]->getDescriptors());
 
+		/*
 		if (goodMatchesOriginal >= goodMatchesRotated)
 			differences.insert(pair<Card*, int>(deck[i], goodMatchesOriginal));
 		else 
 			differences.insert(pair<Card*, int>(deck[i], goodMatchesRotated));
+		*/
+		int matches = goodMatchesOriginal + goodMatchesRotated;
+		differences.insert(pair<Card*, int>(deck[i], matches));
 	}
 
 	pair<Card*, int> max = *max_element(differences.begin(), differences.end(), pairCompare);

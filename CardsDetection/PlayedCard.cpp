@@ -20,7 +20,6 @@ PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point> contours, 
 	this->cornerPoints = cornerPoints;
 	this->contours = contours;
 
-	computeCentralPoint();
 	// Compute the difference with all deck cards
 	if (mode == 0)
 		computeAbsDifference(deck);
@@ -173,29 +172,20 @@ void PlayedCard::computeAbsDifference(vector<Card*> deck) {
 		Scalar sOriginal(sum(diff));
 		Scalar sRotated(sum(diffRotated));
 
-		int diffValue = ((int) sOriginal[0] + (int) sRotated[0]) / 2;	
+		// Mean value between rotated and non rotated cards
+		int diffValue = ((int) sOriginal[0] + (int) sRotated[0] ) / 2;
+
+		// Insert the corresponding value in the card
 		differences.insert(pair<Card*, int>(deck[i], diffValue));
 	}
 
+	// Get the card with the minimum value - Matched card
 	pair<Card*, int> min = *min_element(differences.begin(), differences.end(), pairCompare);
 	this->leastDifferentCard = min.first;
 }
 
 Card* PlayedCard::getLeastDifferentCard() {
 	return leastDifferentCard;
-}
-
-void PlayedCard::computeCentralPoint() {
-	int x = 0;
-	int y = 0;
-	for (int i = 0; i < this->contours.size(); i++) {
-		x += contours[i].x;
-		y += contours[i].y;
-	}
-
-	Point center = Point( (int) (x / this->contours.size()), y / (int) (this->contours.size()));
-
-	this->centralPoint = center;
 }
 
 void PlayedCard::drawCardText(cv::Mat &srcImg) {
@@ -268,10 +258,6 @@ void PlayedCard::setWinner(char result){
 
 char PlayedCard::getWinner(){
 	return this->result;
-}
-
-Point PlayedCard::getCentralPoint(){
-	return this->centralPoint;
 }
 
 PlayedCard::~PlayedCard() 

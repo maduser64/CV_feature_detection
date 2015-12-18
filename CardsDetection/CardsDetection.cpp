@@ -318,15 +318,10 @@ void videoBasedVersion(int mode) {
 		}
 		imshow("Webcam", frame);
 
-		if (waitKey(10) == 32) {
+		if (waitKey(30) == 32) {
 			cout << "Image saved" << endl;
 			image = frame;
 			state = 1;
-			break;
-		}
-		if (waitKey(100) == 27)	{
-			cout << "esc key pressed" << endl;
-			state = 0;
 			break;
 		}
 	}
@@ -349,16 +344,18 @@ void processVideo(Mat frame, int mode) {
 	stringstream ss;
 	ss << "test_samples/frame" << seconds << ".jpg";
 	string fileName = ss.str();
-	imwrite(fileName, frame);
+	imwrite(fileName, frame);	
 
 	imageBasedVersion(fileName, mode);
 
 	waitKey(0);
 
-	if (continueWebcam())
+	if (continueWebcam()) {
+		destroyAllWindows();
 		videoBasedVersion(mode);
+	}
 	else
-		return;
+		destroyAllWindows();
 }
 
 // receives v1 and v2 point vectors and if v1 greater v2 return true

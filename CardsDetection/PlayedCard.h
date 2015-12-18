@@ -10,6 +10,9 @@ private:
 	cv::Mat originalImg;
 	cv::Mat rotatedImg;
 	cv::Point centralPoint;
+	/*Winner->w | Looser->l | Draw->d*/
+	char result;
+	
 	std::map <Card*, int> differences;
 	Card* leastDifferentCard;
 	std::vector < cv::Point2f > cornerPoints;
@@ -38,11 +41,17 @@ public:
 	/*returns the central point*/
 	cv::Point getCentralPoint();
 	/*Sets a new rotated card*/
-	void setRotatedImg(cv::Mat img);
+	void setRotatedImg(cv::Mat);
+	/*Sets the winner state*/
+	void setWinner(char);
+	/*Gets the winner state*/
+	char getWinner();
 	/*Returns a map that holds the difference value between each deck card*/
 	std::map<Card*, int> getCardDifferences();
 	/*Computes the absolute difference, mean between the sum of the difference of both rotated and unrotated card*/
 	void computeAbsDifference(std::vector<Card*>);
+	/*Draws the text on the card*/
+	void drawCardText(cv::Mat&);
 	
 	std::vector<cv::KeyPoint> getKeypointsOriginal();
 	cv::Mat getDescriptorsOriginal();

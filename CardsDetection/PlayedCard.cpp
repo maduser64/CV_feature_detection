@@ -198,6 +198,78 @@ void PlayedCard::computeCentralPoint() {
 	this->centralPoint = center;
 }
 
+void PlayedCard::drawCardText(cv::Mat &srcImg) {
+
+	int FONT_FACE = FONT_HERSHEY_TRIPLEX;
+	int FONT_SCALE = 3;
+	int FONT_THICKNESS = 5;
+	int TOP_MARGIN = 80;
+
+	Mat emptyCard = Mat::zeros(450, 450, srcImg.type());
+	Mat emptyImg = Mat::zeros(srcImg.size(), srcImg.type());
+
+	/*********************************************Top center text*********************************************/
+	
+	string cardName = this->getLeastDifferentCard()->getCard() + " " + this->getLeastDifferentCard()->getSuit();
+	
+
+	Size cardNameSize = getTextSize(cardName, FONT_FACE, FONT_SCALE, FONT_THICKNESS, 0);
+
+	Point topCenterPoint = Point(225 - cardNameSize.width / 2, TOP_MARGIN);
+
+	putText(emptyCard, cardName, topCenterPoint, FONT_FACE, FONT_SCALE, Scalar(255, 255, 255), FONT_THICKNESS);
+
+	/***************************************************************************************************/
+
+	/*********************************************Center text*********************************************/
+	
+	string result;
+	Scalar color;
+	if (this->result == 'w') {
+		result = "Winner";
+		color = Scalar(0, 255, 0);
+	}
+	else if(this->result == 'l') { 
+		result = "Looser"; 
+		color = Scalar(0, 0, 255);
+	}
+	else if (this->result == 'd') {
+		result = "Draw";
+		color = Scalar(255, 255,  0);
+	}
+
+	Size resultSize = getTextSize(result, FONT_FACE, FONT_SCALE, FONT_THICKNESS, 0);
+
+	Point centerPoint = Point(225 - resultSize.width / 2, 225 + resultSize.height / 2);
+
+
+	putText(emptyCard, result, centerPoint, FONT_FACE, FONT_SCALE, color, FONT_THICKNESS);
+
+	/***************************************************************************************************/
+
+	
+	Point2f outputQuad[4] = { Point2f(0, 0), Point2f(450 - 1, 0), Point2f(450 - 1, 450 - 1), Point2f(0, 450 - 1) };
+	Point2f cornerArray[4];
+
+	for (size_t i = 0; i < 4; i++) {
+		cornerArray[i] = this->cornerPoints[i];
+	}
+
+	Mat lambda = getPerspectiveTransform(outputQuad, cornerArray);
+	warpPerspective(emptyCard, emptyImg, lambda, srcImg.size());
+
+
+	srcImg += emptyImg;
+}
+
+void PlayedCard::setWinner(char result){
+	this->result = result;
+}
+
+char PlayedCard::getWinner(){
+	return this->result;
+}
+
 Point PlayedCard::getCentralPoint(){
 	return this->centralPoint;
 }

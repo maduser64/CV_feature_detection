@@ -7,6 +7,7 @@
 #include "PlayedCard.h"
 #include "Opencv.h"
 #include "Cli.h"
+#include "time.h"
 
 extern int MAX_KERNEL_SIZE;
 

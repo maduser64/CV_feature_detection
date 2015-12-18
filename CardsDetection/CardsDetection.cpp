@@ -331,119 +331,29 @@ void videoBasedVersion(int mode) {
 		}
 	}
 
+	destroyWindow("Webcam");
 	if (state == 1)
 		processVideo(image, mode);
 }
 
 void processVideo(Mat frame, int mode) {
-	Mat img = frame;
-	Mat findContoursMat;
-	img.copyTo(findContoursMat);
+	
+	time_t timer;
+	struct tm y2k = { 0 };
+	double seconds;
+	y2k.tm_hour = 0;   y2k.tm_min = 0; y2k.tm_sec = 0;
+	y2k.tm_year = 100; y2k.tm_mon = 0; y2k.tm_mday = 1;
+	time(&timer); 
+	seconds = difftime(timer, mktime(&y2k));
 
-	if (mode == 0) {
-		cvtColor(findContoursMat, findContoursMat, CV_RGB2GRAY);
+	stringstream ss;
+	ss << "test_samples/frame" << seconds << ".jpg";
+	string fileName = ss.str();
+	imwrite(fileName, frame);
 
-		for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
-			GaussianBlur(findContoursMat, findContoursMat, Size(i, i), 0.0, 0.0);
+	imageBasedVersion(fileName, mode);
 
-		threshold(findContoursMat, findContoursMat, 120, 255, CV_THRESH_BINARY);
-	}
-
-	Canny(findContoursMat, findContoursMat, 50, 250);
-
-	vector<vector<Point> > contours;
-	vector<Vec4i> hierarchy;
-
-	// Searches for possible contours
-	findContours(findContoursMat, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-
-	// Sort the contours by area
-	sort(contours.begin(), contours.end(), compareAreas);
-
-	Mat lambda;
-
-	// Holds the 4 cards on present on table
-	Mat procCards[4];
-
-	// Holds the corners coordinats of each card
-	vector<vector<Point2f>> cornerPoints;
-
-	Point2f outputQuad[4] = { Point2f(0, 0), Point2f(CARD_X_SIZE - 1, 0), Point2f(CARD_X_SIZE - 1, CARD_Y_SIZE - 1), Point2f(0, CARD_Y_SIZE - 1) };
-
-	if (contours.size() >= 4) {
-		Scalar color = Scalar(255, 0, 0);
-		// draw the first 4 contours, this will hopefuly represent the 4 cards
-		for (unsigned int i = 0; i < 4; i++) {
-			drawContours(img, contours, i, color, 4, 8, hierarchy, 0);
-			RotatedRect rotatedRect = minAreaRect(contours[i]);
-			Point2f rect_points[4];
-
-			// gets the corner points of each card
-			rotatedRect.points(rect_points);
-			// inserts it on a vector for later use, on card class construction
-
-			vector<Point2f> tempPoints;
-			for (unsigned int k = 0; k < 4; k++)
-				tempPoints.push_back(rect_points[k]);
-
-			cornerPoints.push_back(tempPoints);
-			// Rotates card to make it vertical
-			cardToVertical(rect_points);
-
-			lambda = getPerspectiveTransform(rect_points, outputQuad);
-			warpPerspective(img, procCards[i], lambda, Size(450, 450));
-
-			if (mode == 0) {
-				cvtColor(procCards[i], procCards[i], CV_RGB2GRAY);
-
-				for (int j = 1; j < MAX_KERNEL_SIZE; j = j + 2)
-					GaussianBlur(procCards[i], procCards[i], Size(j, j), 0.0, 0.0);
-
-				adaptiveThreshold(procCards[i], procCards[i], 255, 1, 1, 11, 1);
-				//threshold(procCards[i], procCards[i], 130, 255, CV_THRESH_BINARY_INV);
-			}
-		}
-	}
-
-	vector<Card*> deck; deck.clear(); deck = getDeck(mode);
-	vector<PlayedCard*> playedCards; playedCards.clear();
-
-	// Save the original cards and the 180 degrees rotations
-	for (unsigned int i = 0; i < 4; i++) {
-		Mat rotatedCard;
-		rotateCard(procCards[i], 180.0f, rotatedCard);
-		// push back a new played card and 
-		playedCards.push_back(new PlayedCard(procCards[i], rotatedCard, contours[i], cornerPoints[i], deck, mode));
-	}
-
-	// Show matched cards info
-	for (unsigned int i = 0; i < 4; i++) {
-		string card = playedCards[i]->getLeastDifferentCard()->getCard();
-		string suit = playedCards[i]->getLeastDifferentCard()->getSuit();
-		int score = playedCards[i]->getLeastDifferentCard()->getScore();
-		cout << "Card: " << card << " | suit: " << suit << " | score: " << score << endl;
-
-		for (int j = 0; j < 4; j++)
-			circle(img, playedCards[i]->getCornerPoints()[j], 10, Scalar(255, 0, 0), 10);
-	}
-
-	PlayedCard* winnerCard = getWinner(playedCards);
-
-	cout << "--------------------------------" << endl;
-	cout << winnerCard->getCornerPoints()[0] << endl;
-	cout << winnerCard->getCornerPoints()[1] << endl;
-	cout << winnerCard->getCornerPoints()[2] << endl;
-	cout << winnerCard->getCornerPoints()[3] << endl;
-	cout << "--------------------------------" << endl;
-
-	Mat textImage = Mat::zeros(img.rows, img.cols, img.type());
-	putText(textImage, "Winner!", winnerCard->getCentralPoint(), FONT_HERSHEY_SCRIPT_COMPLEX, 3.0, Scalar(0, 0, 255));
-
-	rotateText(textImage, computeCardAngle(winnerCard), winnerCard->getCentralPoint(), textImage);
-	img = img + textImage;
-
-	namedWindow("Image", WINDOW_NORMAL);
-	imshow("Image", img);
+	waitKey(0);
 
 	if (continueWebcam())
 		videoBasedVersion(mode);

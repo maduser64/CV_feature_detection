@@ -230,7 +230,7 @@ void PlayedCard::drawCardText(cv::Mat &srcImg) {
 		color = Scalar(0, 255, 0);
 	}
 	else if(this->result == 'l') { 
-		result = "Looser"; 
+		result = "Loser"; 
 		color = Scalar(0, 0, 255);
 	}
 	else if (this->result == 'd') {

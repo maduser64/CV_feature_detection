@@ -20,9 +20,6 @@ void rotateCard(cv::Mat&, double, cv::Mat&);
 /*Rotates a given received text material*/
 void rotateCard(cv::Mat&, double, cv::Mat&);
 
-/*Returns the rotation of a given card*/
-double computeCardAngle(PlayedCard*);
-
 /* Returns the distance between 2 points */
 float distancePoints(cv::Point2f, cv::Point2f);
 
@@ -44,13 +41,10 @@ void videoBasedVersion(int);
 /* Process video frame */
 void processVideo(cv::Mat, int);
 
-/* Compares areas */
+/*receives v1 and v2 point vectors and if v1 greater v2 return true*/
 bool compareAreas(std::vector<cv::Point>, std::vector<cv::Point>);
 
 /*Returns the card with highest score*/
 void getWinner(std::vector<PlayedCard*>);
-
-/*Returns a card's center point*/
-cv::Point getCenterPoint(PlayedCard*);
 
 #endif /* CARDS_DETECTION_H_ */

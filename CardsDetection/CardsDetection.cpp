@@ -8,6 +8,10 @@ int MAX_KERNEL_SIZE = 7;
 #define CARD_X_SIZE 450
 #define CARD_Y_SIZE 450
 
+bool compareAreas(vector<Point> v1, vector<Point> v2) {
+	return contourArea(v1, true) > contourArea(v2, true);
+}
+
 void cardToVertical(Point2f* points) {
 	
 	float dist1 = distancePoints(points[0], points[1]);
@@ -109,59 +113,6 @@ void rotateCard(Mat& src, double angle, Mat& dst) {
 	warpAffine(src, dst, r, src.size());
 }
 
-void rotateText(Mat& src, double angle, Point2f originPoint, Mat& dst) {
-
-	// Returns the rotation matrix that represents the specified rotation
-	Mat r = getRotationMatrix2D(originPoint, angle, 1.0);
-
-	// Applies the previous obtained matrix and returns the rotated Mat
-	warpAffine(src, dst, r, src.size());
-}
-
-bool auxMinYPointSort(Point2f pt1, Point2f pt2) { return (pt1.y < pt2.y); }
-bool auxMinXPointSort(Point2f pt1, Point2f pt2) { return (pt1.x < pt2.x); }
-
-double computeCardAngle(PlayedCard* card) {
-
-	double pi = CV_PI;
-
-	/*Min y*/
-	Point2f p1MinY, p2MinY;
-	p1MinY = Point2f();
-	p2MinY = Point2f();
-
-	/*Min x*/
-	Point2f p1MinX, p2MinX;
-	p1MinX = Point2f();
-	p2MinX = Point2f();
-
-	vector<Point2f> cardYMinPoints = card->getCornerPoints();
-	vector<Point2f> cardXMinPoints = card->getCornerPoints();
-
-	sort(cardYMinPoints.begin(), cardYMinPoints.end(), auxMinYPointSort);
-	sort(cardXMinPoints.begin(), cardXMinPoints.end(), auxMinXPointSort);
-
-	p1MinY = Point((int) cardYMinPoints[0].x, (int) cardYMinPoints[0].y);
-	p2MinY = Point((int) cardYMinPoints[1].x, (int) cardYMinPoints[1].y);
-
-	p1MinX = Point((int) cardXMinPoints[0].x, (int) cardXMinPoints[0].y);
-	p2MinX = Point((int) cardXMinPoints[1].x, (int) cardXMinPoints[1].y);
-
-
-	float distY = distancePoints(p1MinY, p2MinY);
-	float distX = distancePoints(p1MinX, p2MinX);
-
-	float angle = 0;
-	if (distY < distX)
-		angle = atan((p2MinY.y - p1MinY.y) / (p2MinY.x - p1MinY.x));
-	else
-		angle = atan((p2MinX.y - p1MinX.y) / (p2MinX.x - p1MinX.x));
-	
-	
-	return -angle * (180/pi);
-
-}
-
 void getWinner(vector<PlayedCard*> playedCards) {
 	PlayedCard* winnerCard = new PlayedCard();
 	int winnerScore = 0;
@@ -203,14 +154,6 @@ void getWinner(vector<PlayedCard*> playedCards) {
 	
 	
 
-}
-
-Point getCenterPoint(PlayedCard* winnerCard) {
-
-	int centerX = (int) (winnerCard->getCornerPoints()[0].x + ((winnerCard->getCornerPoints()[1].x - winnerCard->getCornerPoints()[0].x) / 2));
-	int centerY = (int) (winnerCard->getCornerPoints()[1].y + ((winnerCard->getCornerPoints()[2].y - winnerCard->getCornerPoints()[1].y) / 2));
-
-	return Point((int) winnerCard->getCornerPoints()[1].x, centerY);
 }
 
 void imageBasedVersion(string imagesDir, int mode) {
@@ -321,7 +264,6 @@ void imageBasedVersion(string imagesDir, int mode) {
 	imshow("Image", img);
 }
 
-
 void videoBasedVersion(int mode) {
 
 	Mat image;
@@ -379,9 +321,4 @@ void processVideo(Mat frame, int mode) {
 	}
 	else
 		destroyAllWindows();
-}
-
-// receives v1 and v2 point vectors and if v1 greater v2 return true
-bool compareAreas(vector<Point> v1, vector<Point> v2) {
-	return contourArea(v1, true) > contourArea(v2, true);
 }

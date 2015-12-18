@@ -11,7 +11,6 @@ PlayedCard::PlayedCard () {
 	this->leastDifferentCard = NULL;
 	this->differences.clear();
 }
-
 // mode = 0 -> Use subtraction / mode = 1 -> Use surf
 PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point> contours, vector<Point2f> cornerPoints, vector<Card*> deck, int mode) {
 	this->originalImg = originalImg;

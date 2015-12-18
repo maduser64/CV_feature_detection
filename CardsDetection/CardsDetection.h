@@ -37,4 +37,6 @@ bool compareAreas(std::vector<cv::Point>, std::vector<cv::Point>);
 void getWinner(std::vector<PlayedCard*>);
 /*Resizes a image for a given size*/
 cv::Mat resizeImage(cv::Mat, cv::Size);
+/*Shows a progress bar*/
+void progressBar(int, int, int, int);
 #endif /* CARDS_DETECTION_H_ */

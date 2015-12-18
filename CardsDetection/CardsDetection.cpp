@@ -123,7 +123,7 @@ bool auxMinXPointSort(Point2f pt1, Point2f pt2) { return (pt1.x < pt2.x); }
 
 double computeCardAngle(PlayedCard* card) {
 
-	double pi = 3.141592653589793238462643383279502884;
+	double pi = CV_PI;
 
 	/*Min y*/
 	Point2f p1MinY, p2MinY;
@@ -190,14 +190,13 @@ void imageBasedVersion(string imagesDir, int mode) {
 	Mat findContoursMat;
 	img.copyTo(findContoursMat);
 
-	if (mode == 0) {
+	if (mode == 0)
 		cvtColor(findContoursMat, findContoursMat, CV_RGB2GRAY);
 		
-		for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
-			GaussianBlur(findContoursMat, findContoursMat, Size(i, i), 0.0, 0.0);
+	for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
+		GaussianBlur(findContoursMat, findContoursMat, Size(i, i), 0.0, 0.0);
 
-		threshold(findContoursMat, findContoursMat, 120, 255, CV_THRESH_BINARY);
-	}
+	threshold(findContoursMat, findContoursMat, 120, 255, CV_THRESH_BINARY);
 
 	Canny(findContoursMat, findContoursMat, 50, 250);
 

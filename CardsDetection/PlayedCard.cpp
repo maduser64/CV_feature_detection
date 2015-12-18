@@ -90,12 +90,6 @@ void PlayedCard::computeDifferenceSurf(vector<Card*> deck) {
 		int goodMatchesOriginal = computeSurfGoodMatches(keypointsOriginal, deck[i]->getKeypoints(), descriptorsOriginal, deck[i]->getDescriptors());
 		int goodMatchesRotated = computeSurfGoodMatches(keypointsRotated, deck[i]->getKeypoints(), descriptorsRotated, deck[i]->getDescriptors());
 
-		/*
-		if (goodMatchesOriginal >= goodMatchesRotated)
-			differences.insert(pair<Card*, int>(deck[i], goodMatchesOriginal));
-		else 
-			differences.insert(pair<Card*, int>(deck[i], goodMatchesRotated));
-		*/
 		int matches = goodMatchesOriginal + goodMatchesRotated;
 		differences.insert(pair<Card*, int>(deck[i], matches));
 	}
@@ -103,7 +97,6 @@ void PlayedCard::computeDifferenceSurf(vector<Card*> deck) {
 	pair<Card*, int> max = *max_element(differences.begin(), differences.end(), pairCompare);
 	this->leastDifferentCard = max.first;
 	printf("Match: %s %s \n", this->leastDifferentCard->getCard(), this->leastDifferentCard->getSuit());
-
 }
 
 int PlayedCard::computeSurfGoodMatches(vector<KeyPoint> keypoints_1, vector<KeyPoint> keypoints_2, Mat descriptors_1, Mat descriptors_2) {

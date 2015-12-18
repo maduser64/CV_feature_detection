@@ -163,8 +163,7 @@ void imageBasedVersion(string imagesDir, int mode) {
 	Mat findContoursMat;
 	img.copyTo(findContoursMat);
 
-	if (mode == 0)
-		cvtColor(findContoursMat, findContoursMat, CV_RGB2GRAY);
+	cvtColor(findContoursMat, findContoursMat, CV_RGB2GRAY);
 
 	/**********************Denoise Image**********************/
 	for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)

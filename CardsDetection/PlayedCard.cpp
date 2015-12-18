@@ -142,7 +142,7 @@ Mat PlayedCard::filterMatchesRANSAC(vector<DMatch> &matches, vector<KeyPoint> &k
 		}
 
 		Mat mask;
-		homography = findHomography(srcPoints, dstPoints, CV_RANSAC, 1.0, mask);
+		homography = findHomography(srcPoints, dstPoints, CV_RANSAC, 3.0, mask);
 
 		for (int i = 0; i<mask.rows; i++)
 		{

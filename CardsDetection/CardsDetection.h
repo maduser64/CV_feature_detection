@@ -35,4 +35,6 @@ void processVideo(cv::Mat, int);
 bool compareAreas(std::vector<cv::Point>, std::vector<cv::Point>);
 /*Returns the card with highest score*/
 void getWinner(std::vector<PlayedCard*>);
+/*Resizes a image for a given size*/
+cv::Mat resizeImage(cv::Mat, cv::Size);
 #endif /* CARDS_DETECTION_H_ */

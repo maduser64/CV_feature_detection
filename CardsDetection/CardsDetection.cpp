@@ -159,6 +159,7 @@ void getWinner(vector<PlayedCard*> playedCards) {
 void imageBasedVersion(string imagesDir, int mode) {
 
 	Mat img = imread(imagesDir, CV_LOAD_IMAGE_COLOR);
+	img = resizeImage(img, Size(1000, 700));
 	Mat findContoursMat;
 	img.copyTo(findContoursMat);
 
@@ -260,7 +261,7 @@ void imageBasedVersion(string imagesDir, int mode) {
 	}
 
 
-	namedWindow("Image", WINDOW_NORMAL);
+	namedWindow("Image", WINDOW_AUTOSIZE);
 	imshow("Image", img);
 }
 
@@ -321,4 +322,30 @@ void processVideo(Mat frame, int mode) {
 	}
 	else
 		destroyAllWindows();
+}
+
+Mat resizeImage(Mat src, Size size) {
+
+	// The image is already smaller
+	if (src.size().width <= size.width && src.size().height <= size.height)
+		return src;
+
+	float wRatio = (float) src.size().width / size.width;
+	float hRatio = (float) src.size().height / size.height;
+	
+	int newWidth;
+	int newHeight;
+	Mat resized;
+
+	if (wRatio >= hRatio) {
+		newWidth = size.width;
+		newHeight = (int) (src.size().height / wRatio);
+	}
+	else {
+		newHeight = size.height;
+		newWidth = (int) (src.size().width / hRatio);
+	}
+
+	resize(src, resized, Size(newWidth, newHeight));
+	return resized;
 }

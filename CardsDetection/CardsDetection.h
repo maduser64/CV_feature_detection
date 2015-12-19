@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <windows.h>
 #include "DeckReader.h"
 #include "PlayedCard.h"
 #include "Opencv.h"
@@ -45,4 +46,6 @@ cv::Point computeCentralPoint(std::vector<cv::Point>);
 std::vector<cv::Point> getCardCorners(cv::Point, std::vector<cv::Point>);
 /**/
 bool pairCompare(std::pair<cv::Point*, float>, std::pair<cv::Point*, float>);
+/*Draw loading bar*/
+void showLoadingBar(int progress);
 #endif /* CARDS_DETECTION_H_ */

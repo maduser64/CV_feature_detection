@@ -44,27 +44,29 @@ Mat appendImages(Mat deckArray, Mat card, int index) {
 }
 
 void processDeck(string imagesDir, int mode) {
-	Mat img = imread(imagesDir, CV_LOAD_IMAGE_COLOR);
-	Mat findContoursMat;
-	img.copyTo(findContoursMat);
+	int progress = 0;	
 
-	cvtColor(findContoursMat, findContoursMat, CV_RGB2GRAY);
+	Mat img = imread(imagesDir, CV_LOAD_IMAGE_COLOR); progress += 2; showLoadingBar(progress);
+	Mat findContoursMat;
+	img.copyTo(findContoursMat); progress += 2; showLoadingBar(progress);
+
+	cvtColor(findContoursMat, findContoursMat, CV_RGB2GRAY); progress += 2; showLoadingBar(progress);
 
 	for (int i = 1; i < MAX_KERNEL_SIZE; i = i + 2)
-		GaussianBlur(findContoursMat, findContoursMat, Size(i, i), 0.0, 0.0);
+		GaussianBlur(findContoursMat, findContoursMat, Size(i, i), 0.0, 0.0); for (int i = 0; i < 5; i++) { progress += 2; showLoadingBar(progress); Sleep(10); }
 
-	threshold(findContoursMat, findContoursMat, 120, 255, CV_THRESH_BINARY);
+	threshold(findContoursMat, findContoursMat, 120, 255, CV_THRESH_BINARY); for (int i = 0; i < 5; i++) { progress += 2; showLoadingBar(progress); Sleep(10); }
 
-	Canny(findContoursMat, findContoursMat, 50, 250);
+	Canny(findContoursMat, findContoursMat, 50, 250); for (int i = 0; i < 5; i++) { progress += 2; showLoadingBar(progress); Sleep(10); }
 
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
 
 	// Searches for possible contours
-	findContours(findContoursMat, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+	findContours(findContoursMat, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE); for (int i = 0; i < 5; i++) { progress += 2; showLoadingBar(progress); Sleep(10); }
 
 	// Sort the contours by area
-	sort(contours.begin(), contours.end(), compareAreas);
+	sort(contours.begin(), contours.end(), compareAreas); for (int i = 0; i < 2; i++) { progress += 2; showLoadingBar(progress); Sleep(10); }
 
 	// Will hold the prespective transform mapping
 	Mat lambda;
@@ -78,8 +80,6 @@ void processDeck(string imagesDir, int mode) {
 		Scalar color = Scalar(255, 0, 0);
 		// foreach of 54 cards represented on image
 		for (unsigned int i = 0; i < 54; i++) {
-			//progressBar(i, 54, 50, 100);
-			cout << "coco" << endl;
 			RotatedRect rotatedRect = minAreaRect(contours[i]);
 			Point2f rect_points[4];
 			rotatedRect.points(rect_points);
@@ -89,7 +89,13 @@ void processDeck(string imagesDir, int mode) {
 			warpPerspective(img, outputCard, lambda, Size(450, 450));
 
 			appendImages(deckArray, outputCard, i);
+
+			if (i < 50) {
+				progress += 1;
+				showLoadingBar(progress);
+			}
 		}
+		cout << "\n";
 
 		if (mode == 0) {
 			cvtColor(deckArray, deckArray, CV_RGB2GRAY);
@@ -281,6 +287,7 @@ void imageBasedVersion(string imagesDir, int mode) {
 		// push back a new played card and compute the match
 		playedCards.push_back(new PlayedCard(procCards[i], rotatedCard, contours[i], cornerPoints[i], deck, mode, i));
 	}
+	cout << "\n";
 
 	getWinner(playedCards);
 
@@ -450,25 +457,13 @@ bool pairCompare(pair<Point*, float> p, pair<Point*, float> p1) {
 	return p.second < p1.second;
 }
 
-void progressBar(int x, int n, int r, int w) {
-	// Only update r times.
-	if (x % (n / r + 1) != 0) return;
-
-	// Calculuate the ratio of complete-to-incomplete.
-	float ratio = x / (float) n;
-	int   c = ratio * w;
-
-	// Show the percentage complete.
-	printf("%3d%% [", (int) (ratio * 100));
-
-	// Show the load bar.
-	for (int x = 0; x<c; x++)
-		printf("=");
-
-	for (int x = c; x<w; x++)
-		printf(" ");
-
-	// ANSI Control codes to go back to the
-	// previous line and clear it.
-	printf("]\n\033[F\033[J");
+void showLoadingBar(int progress) {
+	if (progress >= 99)
+		progress = 100;
+	cout << "\r";
+	cout << "[";
+	for (int j = 0; j < progress / 2; j++) {
+		cout << "=";
+	}
+	cout << ">] " << progress << "%";
 }

@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 	mode = chooseExecutionMode();
 
 	if (!deckPreProcessed(mode)) {
-		cout << "Pre-processing deck, please wait" << endl;
+		cout << "Pre-processing deck, please wait ... " << endl;
 		string fullDeckPath = "deck/deck.jpg";
 		processDeck(fullDeckPath, mode);
 		cout << "Success!" << endl;

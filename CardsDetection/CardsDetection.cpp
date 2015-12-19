@@ -160,7 +160,7 @@ void getWinner(vector<PlayedCard*> playedCards) {
 void imageBasedVersion(string imagesDir, int mode) {
 
 	Mat img = imread(imagesDir, CV_LOAD_IMAGE_COLOR);
-	img = resizeImage(img, Size(1000, 700));
+	//img = resizeImage(img, Size(1000, 700));
 	Mat findContoursMat;
 	img.copyTo(findContoursMat);
 
@@ -189,6 +189,8 @@ void imageBasedVersion(string imagesDir, int mode) {
 	
 	// Holds the 4 cards on present on table
 	Mat procCards[4];
+	Point centerPoints[4];
+	
 
 	// Holds the corners coordinats of each card
 	vector<vector<Point2f>> cornerPoints;
@@ -199,7 +201,35 @@ void imageBasedVersion(string imagesDir, int mode) {
 		Scalar color = Scalar(0, 255, 0);
 		// draw the first 4 contours, this will hopefuly represent the 4 cards
 		for (unsigned int i = 0; i < 4; i++) {
-			drawContours(img, contours, i, color, 4, 8, hierarchy, 0);
+
+			
+
+			for (int j = 0; j < contours[i].size(); j++) {
+				//cout << contours[i][j].x << " | " << contours[i][j].y << endl;
+				// Draw contour points
+				circle(img, (Point) contours[i][j], 1, Scalar(255, 0, 0), 5);
+			}
+			
+
+
+			// find card center points
+			centerPoints[i] = computeCentralPoint(contours[i]);
+
+			circle(img, (Point) centerPoints[i], 1, Scalar(255, 0, 255), 5);
+
+
+			vector<Point> cornersNew = getCardCorners(centerPoints[i], contours[i]);
+
+			for (int j = 0; j < cornersNew.size(); j++) {
+				// Draw contour points
+				//circle(img, cornersNew[j], 1, Scalar(255, 255, 0), 5);
+			}
+
+			// Draw contour points
+			circle(img, centerPoints[i], 1, Scalar(255, 255, 0), 5);
+			
+
+			//drawContours(img, contours, i, color, 4, 8, hierarchy, 0);
 			RotatedRect rotatedRect = minAreaRect(contours[i]);
 			Point2f rect_points[4];
 
@@ -215,6 +245,12 @@ void imageBasedVersion(string imagesDir, int mode) {
 				tempPoints.push_back(rect_points[k]);
 
 			cornerPoints.push_back(tempPoints);
+
+			for (int j = 0; j < cornerPoints[i].size(); j++) {
+				//cout << contours[i][j].x << " | " << contours[i][j].y << endl;
+				// Draw contour points
+				circle(img, (Point) cornerPoints[i][j], 1, Scalar(255, 0, 255), 5);
+			}
 			
 			// Calculates a perspective transform from four pairs of the corresponding points
 			lambda = getPerspectiveTransform(rect_points, outputQuad);
@@ -259,7 +295,6 @@ void imageBasedVersion(string imagesDir, int mode) {
 		playedCards[i]->drawCardText(img);
 		
 	}
-
 
 	namedWindow("Image", WINDOW_AUTOSIZE);
 	imshow("Image", img);
@@ -348,6 +383,71 @@ Mat resizeImage(Mat src, Size size) {
 
 	resize(src, resized, Size(newWidth, newHeight));
 	return resized;
+}
+
+Point computeCentralPoint(vector<Point> contours) {
+	int x = 0;
+	int y = 0;
+
+	cout << "contours size " << contours.size() << endl;
+	for (int i = 0; i < contours.size(); i++) {
+		x += contours[i].x;
+		y += contours[i].y;
+	}
+
+	Point center = Point((int) (x / contours.size()), y / (int) (contours.size()));
+
+	return center;
+}
+
+vector<Point> getCardCorners(Point central, vector<Point> contours) {
+
+	//Maps a point and its distance to central point
+	map<Point*, float> distanceMap;
+	map<Point*, float>::iterator itMap;
+	float distance = 0;
+
+	//Computes all distances from all contours to the center point
+	for (unsigned int i = 0; i < contours.size(); i++) {
+		distance = distancePoints(central, contours[i]);
+		distanceMap.insert(pair<Point*, float>(&contours[i], distance));
+	}
+
+	vector<Point> cornerPoints;
+	while (cornerPoints.size() < 4) {
+		pair<Point*, float> max = *max_element(distanceMap.begin(), distanceMap.end(), pairCompare);
+
+		if (cornerPoints.size() == 0) {
+			cornerPoints.push_back(*max.first);
+			itMap = distanceMap.find(max.first);
+			distanceMap.erase(itMap);
+		}
+		else {
+			bool insertPoint = true;
+			for (unsigned int i = 0; i < cornerPoints.size(); i++) {
+				if (distancePoints(*max.first, cornerPoints[i]) < 105) {
+					insertPoint = false;
+					break;
+				}
+			}
+
+			if (insertPoint)
+				cornerPoints.push_back(*max.first);
+
+			//Remove the already processed point
+			itMap = distanceMap.find(max.first);
+			distanceMap.erase(itMap);
+
+		}
+		
+	}
+	
+	return cornerPoints;
+
+}
+
+bool pairCompare(pair<Point*, float> p, pair<Point*, float> p1) {
+	return p.second < p1.second;
 }
 
 void progressBar(int x, int n, int r, int w) {

@@ -39,4 +39,10 @@ void getWinner(std::vector<PlayedCard*>);
 cv::Mat resizeImage(cv::Mat, cv::Size);
 /*Shows a progress bar*/
 void progressBar(int, int, int, int);
+/*Computes a card central point based on contours points*/
+cv::Point computeCentralPoint(std::vector<cv::Point>);
+/**/
+std::vector<cv::Point> getCardCorners(cv::Point, std::vector<cv::Point>);
+/**/
+bool pairCompare(std::pair<cv::Point*, float>, std::pair<cv::Point*, float>);
 #endif /* CARDS_DETECTION_H_ */

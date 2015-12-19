@@ -12,21 +12,46 @@ PlayedCard::PlayedCard () {
 	this->differences.clear();
 }
 // mode = 0 -> Use subtraction / mode = 1 -> Use surf
-PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point> contours, vector<Point2f> cornerPoints, vector<Card*> deck, int mode) {
+PlayedCard::PlayedCard(Mat originalImg, Mat rotatedImg, vector<Point> contours, vector<Point2f> cornerPoints, vector<Card*> deck, int mode, int cardIndex) {
 	this->originalImg = originalImg;
 	this->rotatedImg = rotatedImg;
 	this->leastDifferentCard = NULL;
 	this->cornerPoints = cornerPoints;
 	this->contours = contours;
+	this->cardIndex = cardIndex;
 
+	
 	// Compute the difference with all deck cards
 	if (mode == 0)
 		computeAbsDifference(deck);
 	else if (mode == 1) {
-		computeKeypoints();
-		computeDescriptors();
-		computeDifferenceSurf(deck);
+		int progress = 52;
+		progress += 12 * cardIndex;
+
+		if (progress % 2 == 0) {
+			computeKeypoints(); progress += 1;
+			showLoadingBar(progress);
+			computeDescriptors(); progress += 1;
+			showLoadingBar(progress);
+			computeDifferenceSurf(deck, progress, mode);
+		}
+		else {
+			computeKeypoints();
+			computeDescriptors();
+			computeDifferenceSurf(deck, 0, mode);
+		}
 	}
+}
+
+void PlayedCard::showLoadingBar(int progress) {
+	if (progress >= 99)
+		progress = 100;
+	cout << "\r";
+	cout << "[";
+	for (int j = 0; j < progress / 2; j++) {
+		cout << "=";
+	}
+	cout << ">] " << progress << "%";
 }
 
 Mat PlayedCard::getOriginalImg() {
@@ -82,19 +107,25 @@ void PlayedCard::computeDescriptors() {
 	extractor.compute(rotatedImg, keypointsRotated, descriptorsRotated);
 }
 
-void PlayedCard::computeDifferenceSurf(vector<Card*> deck) {
+void PlayedCard::computeDifferenceSurf(vector<Card*> deck, int progress, int mode) {
 
+	float progress_aux = (float) progress;
 	for (int i = 0; i < deck.size(); i++) {
 		int goodMatchesOriginal = computeSurfGoodMatches(keypointsOriginal, deck[i]->getKeypoints(), descriptorsOriginal, deck[i]->getDescriptors());
 		int goodMatchesRotated = computeSurfGoodMatches(keypointsRotated, deck[i]->getKeypoints(), descriptorsRotated, deck[i]->getDescriptors());
 
 		int matches = goodMatchesOriginal + goodMatchesRotated;
 		differences.insert(pair<Card*, int>(deck[i], matches));
+		progress_aux += 0.185185;
+
+		if (mode == 1 && i % 6 == 0) {
+			showLoadingBar( (int) progress_aux);
+		}
 	}
 
 	pair<Card*, int> max = *max_element(differences.begin(), differences.end(), pairCompare);
 	this->leastDifferentCard = max.first;
-	printf("Match: %s %s \n", this->leastDifferentCard->getCard(), this->leastDifferentCard->getSuit());
+	//printf("Match: %s %s \n", this->leastDifferentCard->getCard(), this->leastDifferentCard->getSuit());
 }
 
 int PlayedCard::computeSurfGoodMatches(vector<KeyPoint> keypoints_1, vector<KeyPoint> keypoints_2, Mat descriptors_1, Mat descriptors_2) {

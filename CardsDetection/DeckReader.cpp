@@ -75,6 +75,7 @@ vector<Card*> getDeck(int mode) {
 
 	int x = 0;
 	int y = 0;
+	int progress = 0;
 	for (int i = 0; i < deck.size(); i++) {
 		y = 0;
 		x = 450 * i;
@@ -88,6 +89,15 @@ vector<Card*> getDeck(int mode) {
 			deck[i]->computeKeypoints();
 			deck[i]->computeDescriptors();
 		}
+		if (progress % 2 == 0) {
+			cout << "\r";
+			cout << "[";
+			for (int j = 0; j < progress / 2; j++) {
+				cout << "=";
+			}
+			cout << ">] " << progress << "%";
+		}
+		progress++;
 	}
 	return deck;
 }

@@ -7,6 +7,7 @@
 
 class PlayedCard {
 private:
+	int cardIndex;
 	/*Represents the original card*/
 	cv::Mat originalImg;
 	/*Represents the rotated card*/
@@ -35,7 +36,7 @@ public:
 	/*Default constructor*/
 	PlayedCard();
 	/*Receives the original card, rotated card and the deck array // mode = 0 -> Use subtraction / mode = 1 -> Use surf */
-	PlayedCard(cv::Mat, cv::Mat, std::vector<cv::Point>, std::vector<cv::Point2f>, std::vector<Card*>, int);
+	PlayedCard(cv::Mat, cv::Mat, std::vector<cv::Point>, std::vector<cv::Point2f>, std::vector<Card*>, int, int);
 	/*Returns the unrotated card*/
 	cv::Mat getOriginalImg();
 	/*Returns the rotated card*/
@@ -70,9 +71,11 @@ public:
 	void computeKeypoints();
 	/*Computed descriptors*/
 	void computeDescriptors();
+	/*Draw loading bar*/
+	void showLoadingBar(int progress);
 
 	/*Computer the difference using SURF*/
-	void computeDifferenceSurf(std::vector<Card*>);
+	void computeDifferenceSurf(std::vector<Card*>, int, int);
 	int computeSurfGoodMatches(std::vector<cv::KeyPoint>, std::vector<cv::KeyPoint>, cv::Mat, cv::Mat);
 	void filterMatchesByAbsoluteValue(std::vector<cv::DMatch>&, float);
 	cv::Mat filterMatchesRANSAC(std::vector<cv::DMatch>&, std::vector<cv::KeyPoint>&, std::vector<cv::KeyPoint>&);

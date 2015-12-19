@@ -279,7 +279,7 @@ void imageBasedVersion(string imagesDir, int mode) {
 		Mat rotatedCard;
 		rotateCard(procCards[i], 180.0f, rotatedCard);
 		// push back a new played card and compute the match
-		playedCards.push_back(new PlayedCard(procCards[i], rotatedCard, contours[i], cornerPoints[i], deck, mode));
+		playedCards.push_back(new PlayedCard(procCards[i], rotatedCard, contours[i], cornerPoints[i], deck, mode, i));
 	}
 
 	getWinner(playedCards);

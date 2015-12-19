@@ -12,6 +12,14 @@ bool compareAreas(vector<Point> v1, vector<Point> v2) {
 	return contourArea(v1, true) > contourArea(v2, true);
 }
 
+bool compareAreasF(vector<Point2f> v1, vector<Point2f> v2) {
+	return contourArea(v1, true) > contourArea(v2, true);
+}
+
+bool compareIndex(PointOrder p1, PointOrder p2) {
+	return (p1.order < p2.order);
+}
+
 void cardToVertical(Point2f* points) {
 	
 	float dist1 = distancePoints(points[0], points[1]);
@@ -106,7 +114,8 @@ void processDeck(string imagesDir, int mode) {
 			//threshold(deckArray, deckArray, 130, 255, CV_THRESH_BINARY_INV);
 
 			imwrite("deck/deck_array_gray.jpg", deckArray);
-		} else
+		}
+		else
 			imwrite("deck/deck_array_color.jpg", deckArray);
 	}
 }
@@ -163,10 +172,10 @@ void getWinner(vector<PlayedCard*> playedCards) {
 
 }
 
-void imageBasedVersion(string imagesDir, int mode) {
+void imageBasedVersion(string imagesDir, int mode, int choice) {
 
 	Mat img = imread(imagesDir, CV_LOAD_IMAGE_COLOR);
-	//img = resizeImage(img, Size(1000, 700));
+	img = resizeImage(img, Size(1000, 700));
 	Mat findContoursMat;
 	img.copyTo(findContoursMat);
 
@@ -183,10 +192,12 @@ void imageBasedVersion(string imagesDir, int mode) {
 
 	// Each element of this vector represents a contour of each closed shape detected
 	vector<vector<Point> > contours;
+	vector<vector<Point> > polyContours;
 	vector<Vec4i> hierarchy;
 
 	// Searches for possible contours and stores them hierarchically and eliminates redundant points
 	findContours(findContoursMat, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+	
 
 	// Sort the contours by area
 	sort(contours.begin(), contours.end(), compareAreas);
@@ -199,67 +210,49 @@ void imageBasedVersion(string imagesDir, int mode) {
 	
 
 	// Holds the corners coordinats of each card
-	vector<vector<Point2f>> cornerPoints;
+	//vector<vector<Point2f> > cornerPoints;
+	vector<vector<Point2f> > cornersNew;
+	vector<vector<Point2f> > cornersVertical;
 
 	Point2f outputQuad[4] = { Point2f(0, 0), Point2f(CARD_X_SIZE - 1, 0), Point2f(CARD_X_SIZE - 1, CARD_Y_SIZE - 1), Point2f(0, CARD_Y_SIZE - 1) };
 
-	if (contours.size() >= 4) {
-		Scalar color = Scalar(0, 255, 0);
+	if (contours.size() >= 4) {		
 		// draw the first 4 contours, this will hopefuly represent the 4 cards
 		for (unsigned int i = 0; i < 4; i++) {
-
-			
-
-			for (int j = 0; j < contours[i].size(); j++) {
-				//cout << contours[i][j].x << " | " << contours[i][j].y << endl;
-				// Draw contour points
-				circle(img, (Point) contours[i][j], 1, Scalar(255, 0, 0), 5);
-			}
-			
-
+			// Get less contours
+			vector<Point> contour;
+			approxPolyDP(contours[i], contour, 1, true);
+			polyContours.push_back(contour);
 
 			// find card center points
-			centerPoints[i] = computeCentralPoint(contours[i]);
+			centerPoints[i] = computeCentralPoint(polyContours[i]);
 
-			circle(img, (Point) centerPoints[i], 1, Scalar(255, 0, 255), 5);
+			// draw center
+			//circle(img, centerPoints[i], 1, Scalar(255, 0, 255), 5);
 
 
-			vector<Point> cornersNew = getCardCorners(centerPoints[i], contours[i]);
-
-			for (int j = 0; j < cornersNew.size(); j++) {
-				// Draw contour points
-				//circle(img, cornersNew[j], 1, Scalar(255, 255, 0), 5);
-			}
-
-			// Draw contour points
-			circle(img, centerPoints[i], 1, Scalar(255, 255, 0), 5);
+			// ordered corners
+			cornersNew.push_back(getCardCorners(centerPoints[i], polyContours[i], choice));
 			
 
-			//drawContours(img, contours, i, color, 4, 8, hierarchy, 0);
-			RotatedRect rotatedRect = minAreaRect(contours[i]);
-			Point2f rect_points[4];
+			// convert vector to array
+			Point2f* newCornerArray = &cornersNew[i][0];
 
-			// gets the corner points of each card
-			rotatedRect.points(rect_points);
+			// card is vertical
+			cardToVertical(newCornerArray);
 
-			// Rotates card to make it vertical
-			cardToVertical(rect_points);
-			
-			// inserts it on a vector for later use, on card class construction
-			vector<Point2f> tempPoints;
-			for (unsigned int k = 0; k < 4; k++)
-				tempPoints.push_back(rect_points[k]);
-
-			cornerPoints.push_back(tempPoints);
-
-			for (int j = 0; j < cornerPoints[i].size(); j++) {
-				//cout << contours[i][j].x << " | " << contours[i][j].y << endl;
-				// Draw contour points
-				circle(img, (Point) cornerPoints[i][j], 1, Scalar(255, 0, 255), 5);
+			// convert back to vector
+			vector<Point2f> verticalAux;
+			for (int k = 0; k < 4; k++) {
+				verticalAux.push_back(newCornerArray[k]);
 			}
+
+			// card in now vertical
+			cornersVertical.push_back(verticalAux);
+
 			
 			// Calculates a perspective transform from four pairs of the corresponding points
-			lambda = getPerspectiveTransform(rect_points, outputQuad);
+			lambda = getPerspectiveTransform(newCornerArray, outputQuad);
 			// Applies a prespective transformation to an image
 			warpPerspective(img, procCards[i], lambda, Size(450, 450));
 
@@ -274,7 +267,8 @@ void imageBasedVersion(string imagesDir, int mode) {
 				adaptiveThreshold(procCards[i], procCards[i], 255, 1, 1, 11, 1);
 				//threshold(procCards[i], procCards[i], 130, 255, CV_THRESH_BINARY_INV);
 			}
-		}		
+
+		}
 	}
 
 	vector<Card*> deck; deck.clear(); deck = getDeck(mode);
@@ -285,13 +279,13 @@ void imageBasedVersion(string imagesDir, int mode) {
 		Mat rotatedCard;
 		rotateCard(procCards[i], 180.0f, rotatedCard);
 		// push back a new played card and compute the match
-		playedCards.push_back(new PlayedCard(procCards[i], rotatedCard, contours[i], cornerPoints[i], deck, mode, i));
+		playedCards.push_back(new PlayedCard(procCards[i], rotatedCard, contours[i], cornersVertical[i], deck, mode, i));
 	}
-	cout << "\n";
 
 	getWinner(playedCards);
 
 	// Show matched cards info
+	cout << "\n\n Results: " << endl << endl;
 	for (unsigned int i = 0; i < 4; i++) {
 		string card = playedCards[i]->getLeastDifferentCard()->getCard();
 		string suit = playedCards[i]->getLeastDifferentCard()->getSuit();
@@ -303,11 +297,29 @@ void imageBasedVersion(string imagesDir, int mode) {
 		
 	}
 
+	for (unsigned int i = 0; i < 4; i++) {
+		if (playedCards[i]->getWinner() == 'w') {
+			cout << "\n Winner: " << endl;
+			string card = playedCards[i]->getLeastDifferentCard()->getCard();
+			string suit = playedCards[i]->getLeastDifferentCard()->getSuit();
+			int score = playedCards[i]->getLeastDifferentCard()->getScore();
+			cout << "Card: " << card << " | suit: " << suit << " | score: " << score << endl;
+		}
+	}
+
 	namedWindow("Image", WINDOW_AUTOSIZE);
+	Scalar color = Scalar(255, 0, 0);
+	for (int a = 0; a < 4; a++) {
+		drawContours(img, contours, a, color, 4, 8, hierarchy, 0);
+		circle(img, centerPoints[a], 1, Scalar(255, 0, 255), 5);
+		for (int b = 0; b < 4; b++)
+		circle(img, cornersVertical[a][b], 1, Scalar(0, 0, 255), 5);
+	}
+	
 	imshow("Image", img);
 }
 
-void videoBasedVersion(int mode) {
+void videoBasedVersion(int mode, int choice) {
 
 	Mat image;
 	int state = -1;
@@ -336,10 +348,10 @@ void videoBasedVersion(int mode) {
 
 	destroyWindow("Webcam");
 	if (state == 1)
-		processVideo(image, mode);
+		processVideo(image, mode, choice);
 }
 
-void processVideo(Mat frame, int mode) {
+void processVideo(Mat frame, int mode, int choice) {
 	
 	time_t timer;
 	struct tm y2k = { 0 };
@@ -354,13 +366,13 @@ void processVideo(Mat frame, int mode) {
 	string fileName = ss.str();
 	imwrite(fileName, frame);	
 
-	imageBasedVersion(fileName, mode);
+	imageBasedVersion(fileName, mode, choice);
 
 	waitKey(0);
 
 	if (continueWebcam()) {
 		destroyAllWindows();
-		videoBasedVersion(mode);
+		videoBasedVersion(mode, choice);
 	}
 	else
 		destroyAllWindows();
@@ -396,7 +408,6 @@ Point computeCentralPoint(vector<Point> contours) {
 	int x = 0;
 	int y = 0;
 
-	cout << "contours size " << contours.size() << endl;
 	for (int i = 0; i < contours.size(); i++) {
 		x += contours[i].x;
 		y += contours[i].y;
@@ -407,53 +418,75 @@ Point computeCentralPoint(vector<Point> contours) {
 	return center;
 }
 
-vector<Point> getCardCorners(Point central, vector<Point> contours) {
 
+vector<Point2f> getCardCorners(Point central, vector<Point> contours, int mode) {
+
+	//Distance parameter
+	int par = 70;
+	if (mode == 2) {
+		RotatedRect rotatedRect = minAreaRect(contours);
+		Point2f rect_points[4];
+
+		// gets the corner points of each card
+		rotatedRect.points(rect_points);
+		vector<Point2f> v(rect_points, rect_points + sizeof rect_points / sizeof rect_points[0]);
+		return v;
+		
+	}
 	//Maps a point and its distance to central point
-	map<Point*, float> distanceMap;
-	map<Point*, float>::iterator itMap;
+	map<PointOrder*, float> distanceMap;
+	map<PointOrder*, float>::iterator itMap;
 	float distance = 0;
 
 	//Computes all distances from all contours to the center point
 	for (unsigned int i = 0; i < contours.size(); i++) {
 		distance = distancePoints(central, contours[i]);
-		distanceMap.insert(pair<Point*, float>(&contours[i], distance));
+		distanceMap.insert(pair<PointOrder*, float>(new PointOrder(&contours[i], i), distance));
 	}
 
-	vector<Point> cornerPoints;
-	while (cornerPoints.size() < 4) {
-		pair<Point*, float> max = *max_element(distanceMap.begin(), distanceMap.end(), pairCompare);
+	vector<Point2f> cornerPoints;
+	vector<PointOrder> unorderedPoints;
+	while (unorderedPoints.size() < 4) {
+		pair<PointOrder*, float> max = *max_element(distanceMap.begin(), distanceMap.end(), pairCompare);
 
-		if (cornerPoints.size() == 0) {
-			cornerPoints.push_back(*max.first);
+		if (unorderedPoints.size() == 0) {
+			unorderedPoints.push_back(*max.first);
 			itMap = distanceMap.find(max.first);
 			distanceMap.erase(itMap);
 		}
 		else {
 			bool insertPoint = true;
-			for (unsigned int i = 0; i < cornerPoints.size(); i++) {
-				if (distancePoints(*max.first, cornerPoints[i]) < 105) {
+			for (unsigned int i = 0; i < unorderedPoints.size(); i++) {
+				if (distancePoints((*max.first->point), (*unorderedPoints[i].point)) < par) {
 					insertPoint = false;
 					break;
 				}
+				
 			}
-
 			if (insertPoint)
-				cornerPoints.push_back(*max.first);
+				unorderedPoints.push_back(*max.first);
 
 			//Remove the already processed point
 			itMap = distanceMap.find(max.first);
 			distanceMap.erase(itMap);
 
 		}
+
 		
 	}
-	
+
+	// Order the points
+	sort(unorderedPoints.begin(), unorderedPoints.end(), compareIndex);
+
+	for (unsigned int i = 0; i < unorderedPoints.size(); i++) {
+		cornerPoints.push_back(*unorderedPoints[i].point);
+	}
+
 	return cornerPoints;
 
 }
 
-bool pairCompare(pair<Point*, float> p, pair<Point*, float> p1) {
+bool pairCompare(pair<PointOrder*, float> p, pair<PointOrder*, float> p1) {
 	return p.second < p1.second;
 }
 

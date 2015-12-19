@@ -73,6 +73,8 @@ public:
 	void computeDescriptors();
 	/*Draw loading bar*/
 	void showLoadingBar(int progress);
+	/*Overlaps image2 over image1*/
+	void overlapImages(cv::Mat&, cv::Mat);
 
 	/*Computer the difference using SURF*/
 	void computeDifferenceSurf(std::vector<Card*>, int, int);

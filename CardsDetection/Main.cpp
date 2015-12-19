@@ -28,10 +28,10 @@ int main(int argc, char** argv) {
 	switch (choice) {
 		case 1:
 			imgPath = getImgPath(test_dir);
-			imageBasedVersion(imgPath, mode);
+			imageBasedVersion(imgPath, mode, choice);
 			break;
 		case 2:
-			videoBasedVersion(mode);
+			videoBasedVersion(mode, choice);
 			break;
 		default:
 			break;

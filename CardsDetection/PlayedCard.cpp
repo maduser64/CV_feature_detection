@@ -116,7 +116,7 @@ void PlayedCard::computeDifferenceSurf(vector<Card*> deck, int progress, int mod
 
 		int matches = goodMatchesOriginal + goodMatchesRotated;
 		differences.insert(pair<Card*, int>(deck[i], matches));
-		progress_aux += 0.185185;
+		progress_aux += (float) 0.185185;
 
 		if (mode == 1 && i % 6 == 0) {
 			showLoadingBar( (int) progress_aux);
@@ -125,7 +125,6 @@ void PlayedCard::computeDifferenceSurf(vector<Card*> deck, int progress, int mod
 
 	pair<Card*, int> max = *max_element(differences.begin(), differences.end(), pairCompare);
 	this->leastDifferentCard = max.first;
-	//printf("Match: %s %s \n", this->leastDifferentCard->getCard(), this->leastDifferentCard->getSuit());
 }
 
 int PlayedCard::computeSurfGoodMatches(vector<KeyPoint> keypoints_1, vector<KeyPoint> keypoints_2, Mat descriptors_1, Mat descriptors_2) {
@@ -137,12 +136,6 @@ int PlayedCard::computeSurfGoodMatches(vector<KeyPoint> keypoints_1, vector<KeyP
 
 	filterMatchesByAbsoluteValue(matches, 0.125);
 	filterMatchesRANSAC(matches, keypoints_1, keypoints_2);
-
-	//Mat img_matches;
-	//drawMatches(img, keypoints_1, img1, keypoints_2, matches, img_matches, Scalar::all(-1), Scalar::all(-1), vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-	//imshow("matches", img_matches);
-	//printf("Good Matches: %d \n", (int)matches.size());
-	//waitKey(0);
 
 	return (int)matches.size();
 }
@@ -229,8 +222,9 @@ void PlayedCard::drawCardText(cv::Mat &srcImg) {
 	Mat emptyImg = Mat::zeros(srcImg.size(), srcImg.type());
 
 	/*********************************************Top center text*********************************************/
-	
-	string cardName = this->getLeastDifferentCard()->getCard() + " " + this->getLeastDifferentCard()->getSuit();
+	string cardName = this->getLeastDifferentCard()->getCard();
+	if (cardName != "Joker")
+		cardName += " " + this->getLeastDifferentCard()->getSuit();
 	
 
 	Size cardNameSize = getTextSize(cardName, FONT_FACE, FONT_SCALE, FONT_THICKNESS, 0);
@@ -278,8 +272,19 @@ void PlayedCard::drawCardText(cv::Mat &srcImg) {
 	Mat lambda = getPerspectiveTransform(outputQuad, cornerArray);
 	warpPerspective(emptyCard, emptyImg, lambda, srcImg.size());
 
+	overlapImages(srcImg, emptyImg);
+}
 
-	srcImg += emptyImg;
+void PlayedCard::overlapImages(Mat &image1, Mat image2) {
+	for (int i = 0; i < image2.size().height; i++) {
+		for (int j = 0; j < image2.size().width; j++) {
+			Vec3b pixel = image2.at<Vec3b>(i, j);
+
+			if (pixel[0] != 0 || pixel[1] != 0 || pixel[2] != 0) {
+				image1.at<Vec3b>(i, j) = pixel;
+			}
+		}
+	}
 }
 
 void PlayedCard::setWinner(char result){

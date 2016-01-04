@@ -89,7 +89,7 @@ vector<Card*> getDeck(int mode) {
 			deck[i]->computeKeypoints();
 			deck[i]->computeDescriptors();
 		}
-		if (progress % 2 == 0) {
+		if (progress % 2 == 0 && mode == 1) {
 			cout << "\r";
 			cout << "[";
 			for (int j = 0; j < progress / 2; j++) {

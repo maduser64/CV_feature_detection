@@ -167,9 +167,6 @@ void getWinner(vector<PlayedCard*> playedCards) {
 				playedCards[i]->setWinner('d');
 		}
 	}
-	
-	
-
 }
 
 void imageBasedVersion(string imagesDir, int mode, int choice) {
@@ -210,7 +207,6 @@ void imageBasedVersion(string imagesDir, int mode, int choice) {
 	
 
 	// Holds the corners coordinats of each card
-	//vector<vector<Point2f> > cornerPoints;
 	vector<vector<Point2f> > cornersNew;
 	vector<vector<Point2f> > cornersVertical;
 
@@ -226,9 +222,6 @@ void imageBasedVersion(string imagesDir, int mode, int choice) {
 
 			// find card center points
 			centerPoints[i] = computeCentralPoint(polyContours[i]);
-
-			// draw center
-			//circle(img, centerPoints[i], 1, Scalar(255, 0, 255), 5);
 
 
 			// ordered corners
@@ -285,7 +278,7 @@ void imageBasedVersion(string imagesDir, int mode, int choice) {
 	getWinner(playedCards);
 
 	// Show matched cards info
-	cout << "\n\n Results: " << endl << endl;
+	cout << "\n\n Results: " << endl;
 	for (unsigned int i = 0; i < 4; i++) {
 		string card = playedCards[i]->getLeastDifferentCard()->getCard();
 		string suit = playedCards[i]->getLeastDifferentCard()->getSuit();
@@ -307,16 +300,16 @@ void imageBasedVersion(string imagesDir, int mode, int choice) {
 		}
 	}
 
-	namedWindow("Image", WINDOW_AUTOSIZE);
+	namedWindow("Results", WINDOW_AUTOSIZE);
 	Scalar color = Scalar(255, 0, 0);
 	for (int a = 0; a < 4; a++) {
 		drawContours(img, contours, a, color, 4, 8, hierarchy, 0);
-		circle(img, centerPoints[a], 1, Scalar(255, 0, 255), 5);
+		
 		for (int b = 0; b < 4; b++)
-		circle(img, cornersVertical[a][b], 1, Scalar(0, 0, 255), 5);
+			circle(img, cornersVertical[a][b], 1, Scalar(0, 0, 255), 5);
 	}
 	
-	imshow("Image", img);
+	imshow("Results", img);
 }
 
 void videoBasedVersion(int mode, int choice) {
